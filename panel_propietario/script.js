@@ -26,24 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Abrir y cerrar modal
-  addBtn.addEventListener('click', () => {
+  addBtn?.addEventListener('click', () => {
     modal.style.display = 'flex';
     carpetaInput.value = ''; // limpia al abrir
     fechaInput.value = ''; // limpia al abrir
   });
 
-  closeBtn.addEventListener('click', () => {
+  closeBtn?.addEventListener('click', () => {
     modal.style.display = 'none';
   });
 
   // Autocompletar carpeta automáticamente
-  nombreInput.addEventListener('input', () => {
+  nombreInput?.addEventListener('input', () => {
     const nombre = nombreInput.value.trim().toLowerCase().replace(/\s+/g, '-');
     carpetaInput.value = nombre ? `clicon-${nombre}` : '';
   });
 
   // Guardar nueva empresa
-  saveBtn.addEventListener('click', () => {
+  saveBtn?.addEventListener('click', () => {
     const nombre = nombreInput.value.trim();
     const email = emailInput.value.trim();
     let password = passInput.value.trim();
@@ -121,5 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
     attachRowEvents(row);
     const nombreEmpresa = row.querySelector('td').textContent.trim();
     agregarFilaPagos(nombreEmpresa);
+  });
+
+  // MARCAR BOTÓN ACTIVO EN BARRA LATERAL
+  document.querySelectorAll('.sidebar-menu li').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+      item.classList.add('active');
+    });
   });
 });
