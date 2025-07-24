@@ -24,7 +24,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      window.location.href = "/crmclicon/propietario/";
+      window.location.href = "/Clicon-HTML/panel_propietario/index_panel_propietario.html";
     } catch (error) {
       alert("Usuario o contraseña incorrectos");
     }
