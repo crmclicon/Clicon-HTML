@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel Propietario</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-</head>
 <body>
-  <div class="container">
-    <aside class="sidebar">
+  <div class="container" style="display: flex;">
+    <aside class="sidebar" style="width: 220px; flex-shrink: 0;">
       <div class="logo-img">
         <img src="logo.png" alt="CLICON logo" />
       </div>
@@ -32,7 +23,7 @@
       <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Salir</button>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" style="flex-grow: 1; padding: 20px; background-color: #F8FBFF; min-height: 100vh;">
       <section id="empresas" class="view-section active">
         <div class="section-header">
           <h1>Empresas</h1>
@@ -104,14 +95,12 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Redirige al login si no hay sesión
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "../login/login.html";
       }
     });
 
-    // Carga de módulo al tocar menú lateral
     document.querySelectorAll('.sidebar-menu li').forEach(item => {
       item.addEventListener('click', async () => {
         const view = item.getAttribute('data-view');
@@ -120,7 +109,7 @@
 
         if (view === 'agregar') {
           try {
-            const response = await fetch('modulo_agregar_empresa.html');
+            const response = await fetch('panel_propietario/modulo_agregar_empresa.html');
             const html = await response.text();
             const agregarSection = document.getElementById('agregar');
             agregarSection.innerHTML = html;
@@ -141,4 +130,3 @@
     });
   </script>
 </body>
-</html>
