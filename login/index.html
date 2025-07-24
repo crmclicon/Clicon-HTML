@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CLICON - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="logo">CLICON</div>
+      <h2>Iniciar Sesión</h2>
+      <form>
+        <input type="email" id="email" placeholder="Correo electrónico" required />
+        <input type="password" id="password" placeholder="Contraseña" required />
+        <button type="submit">Ingresar</button>
+        <p class="link">¿Olvidaste tu contraseña?</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lógica de Firebase en archivo separado -->
+  <script type="module" src="auth.js"></script>
+</body>
+</html>
