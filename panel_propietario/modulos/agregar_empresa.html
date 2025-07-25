@@ -80,7 +80,7 @@
           const ruta = `${nombre}/${archivo.carpeta}/${archivo.nombre}`;
           const refArchivo = ref(storage, ruta);
 
-          const response = await fetch(`../${archivo.nombre}`);
+          const response = await fetch(`${archivo.nombre}`);
           const contenido = await response.text();
 
           await uploadString(refArchivo, contenido);
