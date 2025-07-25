@@ -1,0 +1,35 @@
+// /crmclicon/propietario/componentes/Empresas.js
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase"; // Asegurate de tener tu config Firebase exportada ahí
+
+export default function Empresas() {
+  const [empresas, setEmpresas] = useState([]);
+
+  useEffect(() => {
+    async function fetchEmpresas() {
+      const snapshot = await getDocs(collection(db, "empresas"));
+      const lista = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setEmpresas(lista);
+    }
+
+    fetchEmpresas();
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h1 className="text-xl font-semibold mb-4">Empresas registradas</h1>
+      <div className="grid gap-4">
+        {empresas.map((empresa) => (
+          <div key={empresa.id} className="bg-white p-4 rounded-2xl shadow-sm">
+            <p className="text-lg">{empresa.nombre}</p>
+            <p className="text-xs text-gray-500">ID: {empresa.id}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
