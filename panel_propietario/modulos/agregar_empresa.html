@@ -47,7 +47,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+    const storage = getStorage(app, "gs://clicon-oficial.firebasestorage.app"); // <--- corrección clave
 
     document.getElementById("btn_crear_empresa").addEventListener("click", async () => {
       const nombre = document.getElementById("nombre_empresa").value.trim();
