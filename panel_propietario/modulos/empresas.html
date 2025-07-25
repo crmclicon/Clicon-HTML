@@ -1,35 +1,35 @@
-// /crmclicon/propietario/componentes/Empresas.js
-import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/firebase"; // Asegurate de tener tu config Firebase exportada ahí
+<div style="padding: 24px;">
+  <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">📋 Empresas registradas</h2>
+  <div id="contenedor_empresas" style="display: grid; gap: 16px;"></div>
+</div>
 
-export default function Empresas() {
-  const [empresas, setEmpresas] = useState([]);
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-  useEffect(() => {
-    async function fetchEmpresas() {
-      const snapshot = await getDocs(collection(db, "empresas"));
-      const lista = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setEmpresas(lista);
-    }
+  const firebaseConfig = {
+    apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+    authDomain: "clicon-oficial.firebaseapp.com",
+    projectId: "clicon-oficial"
+  };
 
-    fetchEmpresas();
-  }, []);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-  return (
-    <div className="p-4">
-      <h1 className="text-xl font-semibold mb-4">Empresas registradas</h1>
-      <div className="grid gap-4">
-        {empresas.map((empresa) => (
-          <div key={empresa.id} className="bg-white p-4 rounded-2xl shadow-sm">
-            <p className="text-lg">{empresa.nombre}</p>
-            <p className="text-xs text-gray-500">ID: {empresa.id}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+  const contenedor = document.getElementById("contenedor_empresas");
+  const snapshot = await getDocs(collection(db, "empresas"));
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const card = document.createElement("div");
+    card.style.background = "#ffffff";
+    card.style.borderRadius = "16px";
+    card.style.padding = "16px";
+    card.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)";
+    card.innerHTML = `
+      <strong style="font-size: 16px;">${data.nombre}</strong><br>
+      <small style="color: gray;">ID: ${doc.id}</small>
+    `;
+    contenedor.appendChild(card);
+  });
+</script>
