@@ -18,7 +18,7 @@ const storage = getStorage(app);
 
 // Espera a que cargue el DOM
 window.addEventListener("DOMContentLoaded", () => {
-  const boton = document.querySelector("button");
+  const boton = document.getElementById("btn_crear_empresa");
 
   if (boton) {
     boton.addEventListener("click", async () => {
@@ -35,7 +35,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const userCred = await createUserWithEmailAndPassword(auth, email, pass);
         const uid = userCred.user.uid;
 
-        // Crear carpetas en Storage
+        // Crear carpetas en Storage con archivo .init
         const carpetas = ["historial_carteras", "historial_ventas", "documentacion_clientes"];
         for (const carpeta of carpetas) {
           const refPath = ref(storage, `${nombre}/${carpeta}/.init`);
