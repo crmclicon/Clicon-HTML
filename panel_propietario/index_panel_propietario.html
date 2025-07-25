@@ -96,8 +96,17 @@
         }
 
         try {
-          const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-          const uid = userCred.user.uid;
+          let uid = null;
+          try {
+            const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+            uid = userCred.user.uid;
+          } catch (error) {
+            if (error.code === "auth/email-already-in-use") {
+              console.warn("El email ya está registrado, se continúa con la creación de carpetas.");
+            } else {
+              throw error;
+            }
+          }
 
           const carpetas = ["historial_carteras", "historial_ventas", "documentacion_clientes"];
           for (const carpeta of carpetas) {
@@ -105,7 +114,7 @@
             await uploadString(refPath, "placeholder");
           }
 
-          alert("Empresa creada y carpetas generadas con éxito");
+          alert("Empresa creada y carpetas generadas con éxito (o ya existía el email)");
         } catch (error) {
           alert("Error: " + error.message);
         }
