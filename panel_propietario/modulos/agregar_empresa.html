@@ -63,7 +63,6 @@
         const userCred = await createUserWithEmailAndPassword(auth, email, pass);
         const uid = userCred.user.uid;
 
-        // Guardar en Firestore
         await setDoc(doc(db, "empresas", nombre), {
           nombre: nombre,
           email_responsable: email,
@@ -71,7 +70,6 @@
           createdAt: new Date()
         });
 
-        // Crear carpetas
         const carpetas = ["historial_carteras", "historial_ventas", "documentacion_clientes"];
         for (const carpeta of carpetas) {
           const refPath = ref(storage, `${nombre}/${carpeta}/.init`);
