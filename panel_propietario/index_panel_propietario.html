@@ -86,14 +86,16 @@
     // Capturar clicks globalmente
     document.addEventListener("click", async (e) => {
       if (e.target && e.target.id === "btn_crear_empresa") {
-        const nombre = document.getElementById("nombre_empresa")?.value.trim();
+        const nombreOriginal = document.getElementById("nombre_empresa")?.value.trim();
         const email = document.getElementById("email_responsable")?.value.trim();
         const pass = document.getElementById("pass_empresa")?.value;
 
-        if (!nombre || !email || !pass) {
+        if (!nombreOriginal || !email || !pass) {
           alert("Faltan datos");
           return;
         }
+
+        const nombreSanitizado = nombreOriginal.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_');
 
         try {
           let uid = null;
@@ -110,7 +112,7 @@
 
           const carpetas = ["historial_carteras", "historial_ventas", "documentacion_clientes"];
           for (const carpeta of carpetas) {
-            const refPath = ref(storage, `${nombre}/${carpeta}/.init`);
+            const refPath = ref(storage, `${nombreSanitizado}/${carpeta}/.init`);
             await uploadString(refPath, "placeholder");
           }
 
