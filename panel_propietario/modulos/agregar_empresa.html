@@ -1,22 +1,90 @@
-<div style="padding: 40px; font-family: sans-serif;">
-  <h2 style="color: #3399FF; font-size: 24px;">Agregar nueva empresa</h2>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar Empresa</title>
+</head>
+<body style="background-color: #F8FBFF; margin: 0; font-family: 'SF Pro Display', sans-serif;">
 
-  <div style="margin-top: 30px;">
-    <label for="nombre_empresa" style="display:block; margin-bottom: 5px;">Nombre de la empresa</label>
-    <input type="text" id="nombre_empresa" placeholder="Ej: Autocity S.A." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+  <div style="padding: 40px;">
+    <h2 style="color: #3399FF; font-size: 24px;">Agregar nueva empresa</h2>
+
+    <div style="margin-top: 30px;">
+      <label for="nombre_empresa" style="display:block; margin-bottom: 5px;">Nombre de la empresa</label>
+      <input type="text" id="nombre_empresa" placeholder="Ej: Autocity S.A." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+    </div>
+
+    <div style="margin-top: 20px;">
+      <label for="email_responsable" style="display:block; margin-bottom: 5px;">Email responsable</label>
+      <input type="email" id="email_responsable" placeholder="Ej: gerente@autocity.com" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+    </div>
+
+    <div style="margin-top: 20px;">
+      <label for="pass_empresa" style="display:block; margin-bottom: 5px;">Contraseña</label>
+      <input type="password" id="pass_empresa" placeholder="**********" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+    </div>
+
+    <button id="btn_crear_empresa" style="margin-top: 30px; padding: 12px 24px; background-color: #3399FF; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">
+      Crear empresa
+    </button>
   </div>
 
-  <div style="margin-top: 20px;">
-    <label for="email_responsable" style="display:block; margin-bottom: 5px;">Email responsable</label>
-    <input type="email" id="email_responsable" placeholder="Ej: gerente@autocity.com" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
-  <div style="margin-top: 20px;">
-    <label for="pass_empresa" style="display:block; margin-bottom: 5px;">Contraseña</label>
-    <input type="password" id="pass_empresa" placeholder="**********" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
-  </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial.appspot.com",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
 
-  <button id="btn_crear_empresa" style="margin-top: 30px; padding: 12px 24px; background-color: #3399FF; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">
-    Crear empresa
-  </button>
-</div>
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    document.getElementById("btn_crear_empresa").addEventListener("click", async () => {
+      const nombre = document.getElementById("nombre_empresa").value.trim();
+      const email = document.getElementById("email_responsable").value.trim();
+      const pass = document.getElementById("pass_empresa").value.trim();
+
+      if (!nombre || !email || !pass) {
+        alert("Todos los campos son obligatorios.");
+        return;
+      }
+
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        const uid = userCred.user.uid;
+
+        // Guardar en Firestore
+        await setDoc(doc(db, "empresas", nombre), {
+          nombre: nombre,
+          email_responsable: email,
+          uid: uid,
+          createdAt: new Date()
+        });
+
+        // Crear carpetas
+        const carpetas = ["historial_carteras", "historial_ventas", "documentacion_clientes"];
+        for (const carpeta of carpetas) {
+          const refPath = ref(storage, `${nombre}/${carpeta}/.init`);
+          await uploadString(refPath, "placeholder");
+        }
+
+        alert("Empresa creada y carpetas generadas con éxito.");
+      } catch (error) {
+        alert("Error: " + error.message);
+        console.error(error);
+      }
+    });
+  </script>
+
+</body>
+</html>
