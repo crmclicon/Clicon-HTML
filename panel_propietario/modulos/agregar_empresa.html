@@ -47,7 +47,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app, "gs://clicon-oficial.firebasestorage.app"); // <--- corrección clave
+    const storage = getStorage(app);
 
     document.getElementById("btn_crear_empresa").addEventListener("click", async () => {
       const nombre = document.getElementById("nombre_empresa").value.trim();
@@ -70,13 +70,23 @@
           createdAt: new Date()
         });
 
-        const carpetas = ["historial_carteras", "historial_ventas", "documentacion_clientes"];
-        for (const carpeta of carpetas) {
-          const refPath = ref(storage, `${nombre}/${carpeta}/.init`);
-          await uploadString(refPath, "placeholder");
+        const archivos = [
+          { nombre: "ventas.txt", carpeta: "historial_ventas" },
+          { nombre: "cartera_historial.txt", carpeta: "historial_carteras" },
+          { nombre: "documentacion.txt", carpeta: "documentacion_clientes" }
+        ];
+
+        for (const archivo of archivos) {
+          const ruta = `${nombre}/${archivo.carpeta}/${archivo.nombre}`;
+          const refArchivo = ref(storage, ruta);
+
+          const response = await fetch(`../${archivo.nombre}`);
+          const contenido = await response.text();
+
+          await uploadString(refArchivo, contenido);
         }
 
-        alert("Empresa creada y carpetas generadas con éxito.");
+        alert("Empresa creada y archivos subidos con éxito.");
       } catch (error) {
         alert("Error: " + error.message);
         console.error(error);
