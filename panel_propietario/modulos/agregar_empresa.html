@@ -50,7 +50,7 @@
     const storage = getStorage(app);
 
     document.getElementById("btn_crear_empresa").addEventListener("click", async () => {
-      const nombre = document.getElementById("nombre_empresa").value.trim();
+      let nombre = document.getElementById("nombre_empresa").value.trim();
       const email = document.getElementById("email_responsable").value.trim();
       const pass = document.getElementById("pass_empresa").value.trim();
 
@@ -59,9 +59,14 @@
         return;
       }
 
+      // sanitiza el nombre
+      nombre = nombre.replace(/\s+/g, "_").replace(/\./g, "").toLowerCase();
+      console.log("Nombre limpio:", nombre);
+
       try {
         const userCred = await createUserWithEmailAndPassword(auth, email, pass);
         const uid = userCred.user.uid;
+        console.log("Usuario creado:", uid);
 
         await setDoc(doc(db, "empresas", nombre), {
           nombre: nombre,
@@ -69,6 +74,7 @@
           uid: uid,
           createdAt: new Date()
         });
+        console.log("Documento Firestore creado");
 
         const archivos = [
           { nombre: "ventas.txt", carpeta: "historial_ventas", contenido: "Archivo inicial de ventas" },
@@ -79,13 +85,14 @@
         for (const archivo of archivos) {
           const ruta = `${nombre}/${archivo.carpeta}/${archivo.nombre}`;
           const refArchivo = ref(storage, ruta);
+          console.log("Subiendo:", ruta);
           await uploadString(refArchivo, archivo.contenido);
         }
 
         alert("Empresa creada y archivos subidos con éxito.");
       } catch (error) {
         alert("Error: " + error.message);
-        console.error(error);
+        console.error("Error en el proceso:", error);
       }
     });
   </script>
