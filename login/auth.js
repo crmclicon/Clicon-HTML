@@ -2,6 +2,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -14,6 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
+const db = getFirestore();
 
 window.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("form");
@@ -23,8 +25,33 @@ window.addEventListener("DOMContentLoaded", () => {
     const pass = document.getElementById("password").value;
 
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      window.location.href = "/Clicon-HTML/panel_propietario/index_panel_propietario.html";
+      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      const uid = userCredential.user.uid;
+
+      // Buscar rol del usuario
+      const docRef = doc(db, "usuarios", uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const rol = docSnap.data().rol;
+
+        if (rol === "propietario") {
+          window.location.href = "/crmclicon/propietario/";
+        } else if (rol === "administrador") {
+          window.location.href = "/Clicon-HTML/administracion/panel_administracion.html";
+        } else if (rol === "gerente") {
+          window.location.href = "/Clicon-HTML/gerente/";
+        } else if (rol === "supervisor") {
+          window.location.href = "/Clicon-HTML/supervisor/";
+        } else if (rol === "vendedor") {
+          window.location.href = "/Clicon-HTML/vendedor/";
+        } else {
+          alert("Rol no reconocido");
+        }
+      } else {
+        alert("No se encontró información del rol del usuario");
+      }
+
     } catch (error) {
       alert("Usuario o contraseña incorrectos");
     }
