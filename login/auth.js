@@ -36,9 +36,9 @@ window.addEventListener("DOMContentLoaded", () => {
         const rol = docSnap.data().rol;
 
         if (rol === "propietario") {
-          window.location.href = "/crmclicon/propietario/";
+          window.location.href = "/Clicon-HTML/propietario/propietario.html";
         } else if (rol === "administrador") {
-          window.location.href = "/Clicon-HTML/administracion/panel_administracion.html";
+          window.location.href = "/Clicon-HTML/administracion/administracion.html";
         } else if (rol === "gerente") {
           window.location.href = "/Clicon-HTML/gerente/";
         } else if (rol === "supervisor") {
