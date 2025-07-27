@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,6 +48,13 @@
       }
     }
 
+    function generarNombreUnico() {
+      const ahora = new Date();
+      const fecha = ahora.toISOString().slice(0, 10);
+      const hora = ahora.toTimeString().slice(0, 5).replace(":", "");
+      return `cartera_${fecha}_${hora}.xlsx`;
+    }
+
     window.subirArchivo = async function () {
       const archivo = document.getElementById("inputArchivo").files[0];
       if (!archivo) {
@@ -77,11 +85,12 @@
 
         await borrarArchivoMasViejo(storageFolder);
 
-        const archivoFinal = new File([blob], "cartera_historial.xlsx", { type: blob.type });
+        const nombreUnico = generarNombreUnico();
+        const archivoFinal = new File([blob], nombreUnico, { type: blob.type });
         const destino = ref(storage, rutaBase + archivoFinal.name);
 
         await uploadBytes(destino, archivoFinal);
-        alert("Cartera limpia subida como 'cartera_historial.xlsx'");
+        alert("Cartera limpia subida como " + nombreUnico);
 
       } catch (error) {
         alert("Error al procesar/subir el archivo: " + error.message);
