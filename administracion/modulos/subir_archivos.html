@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Subir Cartera</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    window.subirArchivo = async function () {
+      const archivo = document.getElementById("inputArchivo").files[0];
+      if (!archivo) {
+        alert("Seleccioná un archivo primero");
+        return;
+      }
+
+      const ruta = `sanvicenteautomotores/historial_cartera/${archivo.name}`;
+      const storageRef = ref(storage, ruta);
+
+      try {
+        await uploadBytes(storageRef, archivo);
+        alert("Archivo subido correctamente a historial_cartera");
+      } catch (error) {
+        alert("Error al subir: " + error.message);
+        console.error(error);
+      }
+    }
+  </script>
+</head>
+<body style="background-color: #F8FBFF; font-family: 'SF Pro Display', sans-serif; padding: 40px;">
+  <h2 style="color: #3399FF; font-size: 24px;">Subir Cartera de Clientes</h2>
+
+  <input type="file" id="inputArchivo" style="margin-top: 20px;">
+  <br>
+  <button onclick="subirArchivo()" style="margin-top: 20px; padding: 12px 24px; background-color: #3399FF; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">
+    Subir y guardar
+  </button>
+</body>
+</html>
