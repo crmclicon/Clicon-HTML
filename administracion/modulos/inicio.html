@@ -9,7 +9,7 @@
       getStorage, ref, getDownloadURL, listAll, getMetadata
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
     import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
-    import * as Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js";
+    import { Chart } from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -22,7 +22,6 @@
 
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
-
     let datosGlobales = [];
 
     async function cargarDatos() {
@@ -47,13 +46,14 @@
       const activos = datosGlobales.filter(c => c.ESTADO_CONTRATO === "N0 - Ahorrista");
       const inactivos = datosGlobales.filter(c => c.ESTADO_CONTRATO === "R0 - Renunciado" || c.ESTADO_CONTRATO === "R2 - Rescindido");
       const enMora = activos.filter(c => String(c.NRO_CUOTAS_IMPAGAS || "").trim() !== "");
-
       const total = activos.length + inactivos.length;
+
       const ctx1 = document.getElementById("grafico1").getContext("2d");
       const ctx2 = document.getElementById("grafico2").getContext("2d");
       const ctx3 = document.getElementById("grafico3").getContext("2d");
 
-      new Chart.Doughnut(ctx1, {
+      new Chart(ctx1, {
+        type: "doughnut",
         data: {
           labels: ["Activos", "Otros"],
           datasets: [{ data: [activos.length, total - activos.length], backgroundColor: ["#00cc66", "#e0e0e0"] }]
@@ -61,7 +61,8 @@
         options: { plugins: { legend: { display: false } } }
       });
 
-      new Chart.Doughnut(ctx2, {
+      new Chart(ctx2, {
+        type: "doughnut",
         data: {
           labels: ["Inactivos", "Otros"],
           datasets: [{ data: [inactivos.length, total - inactivos.length], backgroundColor: ["#ff9900", "#e0e0e0"] }]
@@ -69,7 +70,8 @@
         options: { plugins: { legend: { display: false } } }
       });
 
-      new Chart.Doughnut(ctx3, {
+      new Chart(ctx3, {
+        type: "doughnut",
         data: {
           labels: ["En mora", "Sin mora"],
           datasets: [{ data: [enMora.length, activos.length - enMora.length], backgroundColor: ["#b39ddb", "#e0e0e0"] }]
@@ -96,6 +98,7 @@
 
     window.onload = cargarDatos;
   </script>
+
   <style>
     body {
       background: #F8FBFF;
@@ -151,6 +154,6 @@
       <p>En mora: <strong id="numMora">0</strong></p>
     </div>
   </div>
-  <div class="placeholder">📦 Ventas del mes en construcción...</div>
+  <div class="placeholder">📦 Ventas del mes en construcción.</div>
 </body>
 </html>
