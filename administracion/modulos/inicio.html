@@ -9,7 +9,7 @@
       getStorage, ref, getDownloadURL, listAll, getMetadata
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
     import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
-    import Chart from "https://cdn.jsdelivr.net/npm/chart.js";
+    import * as Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -53,8 +53,7 @@
       const ctx2 = document.getElementById("grafico2").getContext("2d");
       const ctx3 = document.getElementById("grafico3").getContext("2d");
 
-      new Chart(ctx1, {
-        type: "doughnut",
+      new Chart.Doughnut(ctx1, {
         data: {
           labels: ["Activos", "Otros"],
           datasets: [{ data: [activos.length, total - activos.length], backgroundColor: ["#00cc66", "#e0e0e0"] }]
@@ -62,8 +61,7 @@
         options: { plugins: { legend: { display: false } } }
       });
 
-      new Chart(ctx2, {
-        type: "doughnut",
+      new Chart.Doughnut(ctx2, {
         data: {
           labels: ["Inactivos", "Otros"],
           datasets: [{ data: [inactivos.length, total - inactivos.length], backgroundColor: ["#ff9900", "#e0e0e0"] }]
@@ -71,8 +69,7 @@
         options: { plugins: { legend: { display: false } } }
       });
 
-      new Chart(ctx3, {
-        type: "doughnut",
+      new Chart.Doughnut(ctx3, {
         data: {
           labels: ["En mora", "Sin mora"],
           datasets: [{ data: [enMora.length, activos.length - enMora.length], backgroundColor: ["#b39ddb", "#e0e0e0"] }]
@@ -94,7 +91,7 @@
         const contrato = (c.CONTRATO || "").toLowerCase();
         return nombre.includes(input) || tel.includes(input) || dni.includes(input) || contrato.includes(input);
       });
-      alert("Coincidencias encontradas: " + resultados.length); // opcional: mostrar lista
+      alert("Coincidencias encontradas: " + resultados.length);
     }
 
     window.onload = cargarDatos;
@@ -139,7 +136,7 @@
   </style>
 </head>
 <body>
-  <input id="busqueda" type="text" placeholder="Buscar por nombre, teléfono, grupo u o o" oninput="filtrarClientes()" />
+  <input id="busqueda" type="text" placeholder="Buscar por nombre, teléfono, grupo u orden" oninput="filtrarClientes()" />
   <div class="graficos">
     <div class="grafico-box">
       <canvas id="grafico1"></canvas>
