@@ -84,7 +84,6 @@
         const archivos = lista.items;
         if (archivos.length === 0) return;
 
-        // ✅ Ordenar por nombre y tomar el último
         archivos.sort((a, b) => a.name.localeCompare(b.name));
         const archivoMasNuevo = archivos[archivos.length - 1];
 
@@ -105,12 +104,16 @@
       let activos = 0, inactivos = 0, mora = 0;
 
       clientes.forEach(c => {
-        const estado = (c.ESTADO_CONTRATO || "").trim().toUpperCase();
+        const estado = (c.ESTADO_CONTRATO || "").toUpperCase();
         const deuda = (c.NRO_CUOTAS_IMPAGAS || "").toString().trim();
-        if (estado === "N0" || estado === "AHORRISTA") {
+
+        const esActivo = estado.includes("N0") || estado.includes("AHORRISTA");
+        const esInactivo = estado.includes("R0") || estado.includes("RENUNCIADO") || estado.includes("R2") || estado.includes("RESCINDIDO");
+
+        if (esActivo) {
           activos++;
           if (deuda && deuda !== "0") mora++;
-        } else if (estado === "R0" || estado === "RENUNCIADO" || estado === "R2" || estado === "RESCINDIDO") {
+        } else if (esInactivo) {
           inactivos++;
         }
       });
@@ -121,7 +124,6 @@
       document.getElementById("inactivosCount").textContent = inactivos;
       document.getElementById("moraCount").textContent = mora;
 
-      // Activos
       new Chart(document.getElementById("activosChart"), {
         type: "doughnut",
         data: {
@@ -145,7 +147,6 @@
         }
       });
 
-      // Inactivos
       new Chart(document.getElementById("inactivosChart"), {
         type: "doughnut",
         data: {
@@ -169,7 +170,6 @@
         }
       });
 
-      // En mora (solo sobre activos)
       new Chart(document.getElementById("moraChart"), {
         type: "doughnut",
         data: {
