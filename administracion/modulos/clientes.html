@@ -58,6 +58,7 @@
           tarjeta.innerHTML = `
             <h3>${cliente.NOMBRE_SUSCRIPTOR || "Sin nombre"}</h3>
             <p>📞 Tel: ${cliente.TELEFONO_SUSCRIPTOR || "-"}</p>
+            <p>📞 Tel 2: ${cliente.TELEFONO_ALTERNATIVO || "-"}</p>
             <p>🧑‍💼 Vendedor: ${cliente.VENDEDOR || "-"}</p>
             <p>📈 Avance: ${cliente.ULT_CUOTA_EMITIDA || "-"}</p>
             <p>💸 Pagas: ${cliente.CANT_CUOTAS_PAGAS || 0}</p>
