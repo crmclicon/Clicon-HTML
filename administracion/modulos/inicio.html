@@ -36,6 +36,38 @@
       text-align: center;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
+    .modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      z-index: 9999;
+      width: 400px;
+      max-width: 90%;
+    }
+    .modal h3 {
+      margin-top: 0;
+      color: #3399FF;
+    }
+    .modal button {
+      margin-top: 20px;
+      background: #3399FF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.3);
+      z-index: 9998;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +129,7 @@
         const datos = XLSX.utils.sheet_to_json(hoja);
 
         procesarEstadisticas(datos);
+        window._clientes = datos; // lo guardamos global para búsqueda
       } catch (e) {
         console.error("Error al cargar datos:", e);
       }
@@ -190,6 +223,45 @@
           }
         }
       });
+    }
+
+    // Buscar cliente al presionar Enter
+    const inputBuscar = document.querySelector("input[type='text']");
+    inputBuscar.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        buscarCliente(inputBuscar.value.trim().toLowerCase());
+      }
+    });
+
+    function buscarCliente(valor) {
+      if (!valor || !window._clientes) return;
+      const encontrado = window._clientes.find(c =>
+        (c.NOMBRE_SUSCRIPTOR || "").toLowerCase().includes(valor) ||
+        (c.TELEFONO || "").toString().includes(valor) ||
+        (c.GRUPO || "").toString().includes(valor) ||
+        (c.ORDEN || "").toString().includes(valor)
+      );
+
+      if (encontrado) {
+        const overlay = document.createElement("div");
+        overlay.className = "modal-overlay";
+
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.innerHTML = `
+          <h3>Cliente encontrado</h3>
+          <p><b>Nombre:</b> ${encontrado.NOMBRE_SUSCRIPTOR || "?"}</p>
+          <p><b>Teléfono:</b> ${encontrado.TELEFONO || "?"}</p>
+          <p><b>Grupo:</b> ${encontrado.GRUPO || "?"}</p>
+          <p><b>Orden:</b> ${encontrado.ORDEN || "?"}</p>
+          <p><b>Estado:</b> ${encontrado.ESTADO_CONTRATO || "?"}</p>
+          <button onclick="document.body.removeChild(this.parentNode); document.body.removeChild(overlay)">Cerrar</button>
+        `;
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+      } else {
+        alert("No se encontró ningún cliente con ese dato.");
+      }
     }
 
     cargarDatos();
