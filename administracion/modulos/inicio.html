@@ -53,7 +53,7 @@
       color: #3399FF;
     }
     .modal button {
-      margin-top: 20px;
+      margin-top: 10px;
       background: #3399FF;
       color: white;
       border: none;
@@ -72,7 +72,7 @@
 </head>
 <body>
   <h2>Inicio</h2>
-  <input type="text" placeholder="Buscar por nombre, teléfono, grupo u orden" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 24px;" />
+  <input type="text" placeholder="Buscar por nombre, teléfono, G-O" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 24px;" />
 
   <div class="estadisticas">
     <div>
@@ -236,33 +236,71 @@
 
     function buscarCliente(valor) {
       if (!valor || !window._clientes) return;
-      const encontrado = window._clientes.find(c =>
+
+      const resultados = window._clientes.filter(c =>
         (c.NOMBRE_SUSCRIPTOR || "").toLowerCase().includes(valor) ||
-        (c.TELEFONO || "").toString().includes(valor) ||
-        (c.GRUPO || "").toString().includes(valor) ||
-        (c.ORDEN || "").toString().includes(valor)
+        (c.TELEFONO_SUSCRIPTOR || "").toString().includes(valor) ||
+        (c.CONTRATO || "").toString().includes(valor)
       );
 
-      if (encontrado) {
-        const overlay = document.createElement("div");
-        overlay.className = "modal-overlay";
-
-        const modal = document.createElement("div");
-        modal.className = "modal";
-        modal.innerHTML = `
-          <h3>Cliente encontrado</h3>
-          <p><b>Nombre:</b> ${encontrado.NOMBRE_SUSCRIPTOR || "?"}</p>
-          <p><b>Teléfono:</b> ${encontrado.TELEFONO || "?"}</p>
-          <p><b>Grupo:</b> ${encontrado.GRUPO || "?"}</p>
-          <p><b>Orden:</b> ${encontrado.ORDEN || "?"}</p>
-          <p><b>Estado:</b> ${encontrado.ESTADO_CONTRATO || "?"}</p>
-          <button onclick="document.body.removeChild(this.parentNode); document.body.removeChild(overlay)">Cerrar</button>
-        `;
-        document.body.appendChild(overlay);
-        document.body.appendChild(modal);
-      } else {
+      if (resultados.length === 0) {
         alert("No se encontró ningún cliente con ese dato.");
+        return;
       }
+
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      document.body.appendChild(overlay);
+
+      const modal = document.createElement("div");
+      modal.className = "modal";
+
+      if (resultados.length === 1) {
+        mostrarCliente(resultados[0], modal, overlay);
+      } else {
+        modal.innerHTML = `<h3>Coincidencias encontradas</h3>`;
+        resultados.forEach((c, i) => {
+          const nombre = c.NOMBRE_SUSCRIPTOR || `Sin nombre (${i + 1})`;
+          const btn = document.createElement("button");
+          btn.textContent = nombre;
+          btn.style.display = "block";
+          btn.style.margin = "10px 0";
+          btn.onclick = () => {
+            modal.remove();
+            mostrarCliente(c, document.createElement("div"), overlay);
+          };
+          modal.appendChild(btn);
+        });
+        const cerrar = document.createElement("button");
+        cerrar.textContent = "Cancelar";
+        cerrar.onclick = () => {
+          modal.remove();
+          overlay.remove();
+        };
+        modal.appendChild(cerrar);
+      }
+
+      document.body.appendChild(modal);
+    }
+
+    function mostrarCliente(c, modal, overlay) {
+      modal.className = "modal";
+      modal.innerHTML = `
+        <h3>Cliente encontrado</h3>
+        <p><b>Nombre:</b> ${c.NOMBRE_SUSCRIPTOR || "?"}</p>
+        <p><b>Teléfono:</b> ${c.TELEFONO_SUSCRIPTOR || "?"}</p>
+        <p><b>G-O:</b> ${c.CONTRATO || "?"}</p>
+        <p><b>Estado:</b> ${c.ESTADO_CONTRATO || "?"}</p>
+        <p><b>Ctas pagas:</b> ${c.CANT_CUOTAS_PAGAS || "?"}</p>
+        <p><b>Ctas emitidas:</b> ${c.CANT_CUOTAS_EMITIDAS || "?"}</p>
+        <button id="cerrarModal">Cerrar</button>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById("cerrarModal").onclick = () => {
+        modal.remove();
+        overlay.remove();
+      };
     }
 
     cargarDatos();
