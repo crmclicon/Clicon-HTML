@@ -122,10 +122,11 @@
       document.getElementById("inactivosCount").textContent = inactivos;
       document.getElementById("moraCount").textContent = mora;
 
+      // Activos
       new Chart(document.getElementById("activosChart"), {
         type: "doughnut",
         data: {
-          labels: ["Activos", "Otros"],
+          labels: ["Activos", "No activos"],
           datasets: [{
             data: [activos, total - activos],
             backgroundColor: ["#33cc33", "#eee"]
@@ -136,7 +137,7 @@
           plugins: {
             title: {
               display: true,
-              text: `Activos: ${porcentaje(activos, total)}%`,
+              text: `${porcentaje(activos, total)}% activos`,
               position: 'bottom',
               font: { size: 14 }
             },
@@ -145,6 +146,7 @@
         }
       });
 
+      // Inactivos
       new Chart(document.getElementById("inactivosChart"), {
         type: "doughnut",
         data: {
@@ -159,7 +161,7 @@
           plugins: {
             title: {
               display: true,
-              text: `Inactivos: ${porcentaje(inactivos, total)}%`,
+              text: `${porcentaje(inactivos, total)}% inactivos`,
               position: 'bottom',
               font: { size: 14 }
             },
@@ -168,6 +170,7 @@
         }
       });
 
+      // En mora (solo sobre activos)
       new Chart(document.getElementById("moraChart"), {
         type: "doughnut",
         data: {
@@ -182,7 +185,7 @@
           plugins: {
             title: {
               display: true,
-              text: `En mora: ${porcentaje(mora, activos)}%`,
+              text: `${porcentaje(mora, activos)}% en mora`,
               position: 'bottom',
               font: { size: 14 }
             },
