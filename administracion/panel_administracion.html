@@ -46,11 +46,17 @@
     main {
       flex: 1;
       background-color: #F8FBFF;
-      padding: 40px;
+      padding: 0;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
     h2 {
       font-size: 24px;
       color: #3399FF;
+      padding: 40px;
     }
   </style>
 </head>
@@ -59,41 +65,34 @@
     <div class="logo">
       <img src="logo.png" alt="CLICON logo">
     </div>
-    <button onclick="cargarModulo('INICIO')">Inicio</button>
-    <button onclick="cargarModulo('CLIENTES')">Clientes</button>
-    <button onclick="cargarModulo('BOT-WHATSAPP')">Bot-Whatsapp</button>
-    <button onclick="cargarModuloArchivo('modulos/subir_archivos.html', this)">Subir archivos</button>
-    <button onclick="cargarModulo('SCORING')">Scoring</button>
-    <button onclick="cargarModulo('MORAS')">Moras</button>
-    <button onclick="cargarModulo('NOMINA')">Nomina</button>
-    <button onclick="cargarModulo('DESCARGAR-CUOTA')">Descargar-Cuota</button>
-    <button onclick="cargarModulo('CAMPAÑAS')">Campañas</button>
-    <button onclick="cargarModulo('CREAR USUARIO')">Crear usuario</button>
-    <button onclick="cargarModulo('CAMBIOS DE ESTADO')">Cambios de estado</button>
-    <button onclick="cargarModulo('SIN USO 12')">Sin uso 12</button>
-    <button onclick="cargarModulo('SIN USO 13')">Sin uso 13</button>
-    <button onclick="cargarModulo('SALIR')">Salir</button>
+    <button onclick="cargarModulo('INICIO', this)">Inicio</button>
+    <button onclick="cargarModulo('CLIENTES', this)">Clientes</button>
+    <button onclick="cargarModulo('BOT-WHATSAPP', this)">Bot-Whatsapp</button>
+    <button onclick="cargarIframe('modulos/subir_archivos.html', this)">Subir archivos</button>
+    <button onclick="cargarModulo('SCORING', this)">Scoring</button>
+    <button onclick="cargarModulo('MORAS', this)">Moras</button>
+    <button onclick="cargarModulo('NOMINA', this)">Nomina</button>
+    <button onclick="cargarModulo('DESCARGAR-CUOTA', this)">Descargar-Cuota</button>
+    <button onclick="cargarModulo('CAMPAÑAS', this)">Campañas</button>
+    <button onclick="cargarModulo('CREAR USUARIO', this)">Crear usuario</button>
+    <button onclick="cargarModulo('CAMBIOS DE ESTADO', this)">Cambios de estado</button>
+    <button onclick="cargarModulo('SIN USO 12', this)">Sin uso 12</button>
+    <button onclick="cargarModulo('SIN USO 13', this)">Sin uso 13</button>
+    <button onclick="cargarModulo('SALIR', this)">Salir</button>
   </aside>
   <main id="contenido">
     <h2>Bienvenido al panel administrativo</h2>
   </main>
 
   <script>
-    function cargarModulo(nombre) {
+    function cargarModulo(nombre, boton) {
       document.getElementById("contenido").innerHTML = `<h2>Estamos trabajando en este módulo: ${nombre}</h2>`;
-      activarBotonActivo(event.target);
+      activarBotonActivo(boton);
     }
 
-    function cargarModuloArchivo(ruta, boton) {
-      fetch(ruta)
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById("contenido").innerHTML = html;
-          activarBotonActivo(boton);
-        })
-        .catch(() => {
-          document.getElementById("contenido").innerHTML = "<h2>Error al cargar el módulo.</h2>";
-        });
+    function cargarIframe(ruta, boton) {
+      document.getElementById("contenido").innerHTML = `<iframe src="${ruta}"></iframe>`;
+      activarBotonActivo(boton);
     }
 
     function activarBotonActivo(boton) {
