@@ -2,14 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Inicio - Panel Administrativo</title>
+  <title>Inicio</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import {
       getStorage, ref, getDownloadURL, listAll, getMetadata
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
     import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
-    import { Chart } from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js";
+    import * as Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -22,138 +22,136 @@
 
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
-    let datosGlobales = [];
 
     async function cargarDatos() {
-      const carpetaRef = ref(storage, "sanvicenteautomotores/historial_cartera");
-      const listado = await listAll(carpetaRef);
+      const refCarpeta = ref(storage, "sanvicenteautomotores/historial_cartera");
+      const listado = await listAll(refCarpeta);
       const archivos = listado.items;
+
+      if (archivos.length === 0) return;
+
       const metas = await Promise.all(archivos.map(a => getMetadata(a)));
-      const indexMasReciente = metas.reduce((maxIdx, meta, idx, arr) =>
-        new Date(meta.updated) > new Date(arr[maxIdx].updated) ? idx : maxIdx, 0);
-      const archivoMasReciente = archivos[indexMasReciente];
-      const url = await getDownloadURL(archivoMasReciente);
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array" });
-      const hoja = workbook.Sheets[workbook.SheetNames[0]];
+      const index = metas.reduce((max, meta, i, arr) =>
+        new Date(meta.updated) > new Date(arr[max].updated) ? i : max, 0);
+
+      const archivo = archivos[index];
+      const url = await getDownloadURL(archivo);
+      const buffer = await fetch(url).then(r => r.arrayBuffer());
+      const wb = XLSX.read(buffer, { type: "array" });
+      const hoja = wb.Sheets[wb.SheetNames[0]];
       const datos = XLSX.utils.sheet_to_json(hoja);
-      datosGlobales = datos;
-      generarEstadisticas();
+
+      generarEstadisticas(datos);
     }
 
-    function generarEstadisticas() {
-      const activos = datosGlobales.filter(c => c.ESTADO_CONTRATO === "N0 - Ahorrista");
-      const inactivos = datosGlobales.filter(c => c.ESTADO_CONTRATO === "R0 - Renunciado" || c.ESTADO_CONTRATO === "R2 - Rescindido");
-      const enMora = activos.filter(c => String(c.NRO_CUOTAS_IMPAGAS || "").trim() !== "");
-      const total = activos.length + inactivos.length;
+    function generarEstadisticas(clientes) {
+      const activos = clientes.filter(c => c.ESTADO_CONTRATO === "N0").length;
+      const inactivos = clientes.filter(c => ["R0", "R2"].includes(c.ESTADO_CONTRATO)).length;
+      const enMora = clientes.filter(c =>
+        c.ESTADO_CONTRATO === "N0" && typeof c.NRO_CUOTAS_IMPAGAS === "string" && c.NRO_CUOTAS_IMPAGAS.trim() !== ""
+      ).length;
 
-      const ctx1 = document.getElementById("grafico1").getContext("2d");
-      const ctx2 = document.getElementById("grafico2").getContext("2d");
-      const ctx3 = document.getElementById("grafico3").getContext("2d");
+      document.getElementById("activos").textContent = activos;
+      document.getElementById("inactivos").textContent = inactivos;
+      document.getElementById("enmora").textContent = enMora;
 
-      new Chart(ctx1, {
-        type: "doughnut",
+      const ctx1 = document.getElementById("chart1");
+      const ctx2 = document.getElementById("chart2");
+      const ctx3 = document.getElementById("chart3");
+
+      new Chart.Chart(ctx1, {
+        type: 'doughnut',
         data: {
-          labels: ["Activos", "Otros"],
-          datasets: [{ data: [activos.length, total - activos.length], backgroundColor: ["#00cc66", "#e0e0e0"] }]
+          labels: ["Activos", "Resto"],
+          datasets: [{
+            data: [activos, clientes.length - activos],
+            backgroundColor: ["#42f572", "#dfe6e9"]
+          }]
         },
-        options: { plugins: { legend: { display: false } } }
+        options: { cutout: "70%", plugins: { legend: { display: false } } }
       });
 
-      new Chart(ctx2, {
-        type: "doughnut",
+      new Chart.Chart(ctx2, {
+        type: 'doughnut',
         data: {
-          labels: ["Inactivos", "Otros"],
-          datasets: [{ data: [inactivos.length, total - inactivos.length], backgroundColor: ["#ff9900", "#e0e0e0"] }]
+          labels: ["Inactivos", "Resto"],
+          datasets: [{
+            data: [inactivos, clientes.length - inactivos],
+            backgroundColor: ["#f9a825", "#dfe6e9"]
+          }]
         },
-        options: { plugins: { legend: { display: false } } }
+        options: { cutout: "70%", plugins: { legend: { display: false } } }
       });
 
-      new Chart(ctx3, {
-        type: "doughnut",
+      new Chart.Chart(ctx3, {
+        type: 'doughnut',
         data: {
           labels: ["En mora", "Sin mora"],
-          datasets: [{ data: [enMora.length, activos.length - enMora.length], backgroundColor: ["#b39ddb", "#e0e0e0"] }]
+          datasets: [{
+            data: [enMora, activos - enMora],
+            backgroundColor: ["#A29BFE", "#dfe6e9"]
+          }]
         },
-        options: { plugins: { legend: { display: false } } }
+        options: { cutout: "70%", plugins: { legend: { display: false } } }
       });
-
-      document.getElementById("numActivos").innerText = activos.length;
-      document.getElementById("numInactivos").innerText = inactivos.length;
-      document.getElementById("numMora").innerText = enMora.length;
-    }
-
-    function filtrarClientes() {
-      const input = document.getElementById("busqueda").value.toLowerCase();
-      const resultados = datosGlobales.filter(c => {
-        const nombre = (c.NOMBRE_SUSCRIPTOR || "").toLowerCase();
-        const tel = (c.TELEFONO_SUSCRIPTOR || "").toLowerCase();
-        const dni = (String(c["Nro Documento"] || "").replace(/^20|23|24|27/, "").slice(0, 8));
-        const contrato = (c.CONTRATO || "").toLowerCase();
-        return nombre.includes(input) || tel.includes(input) || dni.includes(input) || contrato.includes(input);
-      });
-      alert("Coincidencias encontradas: " + resultados.length);
     }
 
     window.onload = cargarDatos;
   </script>
-
   <style>
     body {
       background: #F8FBFF;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
       padding: 30px;
     }
-    #busqueda {
+    .buscador {
       width: 100%;
-      max-width: 600px;
-      font-size: 18px;
-      padding: 12px;
-      margin-bottom: 30px;
-      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      margin-bottom: 25px;
     }
     .graficos {
       display: flex;
-      gap: 40px;
+      gap: 50px;
       align-items: center;
-      margin-bottom: 30px;
+      justify-content: flex-start;
     }
-    .grafico-box {
-      text-align: center;
+    canvas {
+      width: 130px !important;
+      height: 130px !important;
     }
-    .grafico-box canvas {
-      width: 120px;
-      height: 120px;
-    }
-    .placeholder {
+    .card-ventas {
       background: white;
-      padding: 40px;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 50px;
       text-align: center;
-      border-radius: 16px;
       font-size: 18px;
-      color: #999;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      color: #888;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
     }
   </style>
 </head>
 <body>
-  <input id="busqueda" type="text" placeholder="Buscar por nombre, teléfono, grupo u orden" oninput="filtrarClientes()" />
+  <input class="buscador" type="text" placeholder="Buscar por nombre, teléfono, grupo u orden" />
   <div class="graficos">
-    <div class="grafico-box">
-      <canvas id="grafico1"></canvas>
-      <p>Activos: <strong id="numActivos">0</strong></p>
+    <div>
+      <canvas id="chart1"></canvas>
+      <div style="text-align: center;">Activos: <strong id="activos">0</strong></div>
     </div>
-    <div class="grafico-box">
-      <canvas id="grafico2"></canvas>
-      <p>Inactivos: <strong id="numInactivos">0</strong></p>
+    <div>
+      <canvas id="chart2"></canvas>
+      <div style="text-align: center;">Inactivos: <strong id="inactivos">0</strong></div>
     </div>
-    <div class="grafico-box">
-      <canvas id="grafico3"></canvas>
-      <p>En mora: <strong id="numMora">0</strong></p>
+    <div>
+      <canvas id="chart3"></canvas>
+      <div style="text-align: center;">En mora: <strong id="enmora">0</strong></div>
     </div>
   </div>
-  <div class="placeholder">📦 Ventas del mes en construcción.</div>
+  <div class="card-ventas">
+    📦 Ventas del mes en construcción...
+  </div>
 </body>
 </html>
