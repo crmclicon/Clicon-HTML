@@ -29,7 +29,12 @@
 
         if (archivos.length === 0) throw new Error("No hay archivos en la carpeta");
 
-        const ultimo = archivos.sort((a, b) => b.name.localeCompare(a.name))[0];
+        // Obtener metadatos para saber cuál es el último subido
+        const metas = await Promise.all(archivos.map(a => a.getMetadata()));
+        const indexMasReciente = metas.reduce((maxIdx, meta, idx, arr) => {
+          return new Date(meta.updated) > new Date(arr[maxIdx].updated) ? idx : maxIdx;
+        }, 0);
+        const ultimo = archivos[indexMasReciente];
         const url = await getDownloadURL(ultimo);
 
         const response = await fetch(url);
