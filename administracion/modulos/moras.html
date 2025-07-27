@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -55,14 +54,14 @@
 
         datos.forEach(cliente => {
           const estado = cliente.ESTADO_CONTRATO || "";
-          const deuda = cliente.NRO_CUOTAS_IMPAGAS || "";
+          const deuda = String(cliente.NRO_CUOTAS_IMPAGAS || "");
 
           if (estado === "N0 - Ahorrista" && deuda.trim() !== "") {
             const fila = document.createElement("tr");
             fila.innerHTML = `
               <td>${cliente.NOMBRE_SUSCRIPTOR || "-"}</td>
               <td>${cliente.VENDEDOR || "-"}</td>
-              <td>${cliente.NRO_CUOTAS_IMPAGAS}</td>
+              <td>${deuda}</td>
             `;
             cuerpo.appendChild(fila);
           }
