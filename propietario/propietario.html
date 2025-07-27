@@ -39,7 +39,7 @@
           <li><a href="#" onclick="cargarModulo('modulos/agregar_empresa.html')" style="display: block; padding: 10px; color: #333; text-decoration: none; border-radius: 10px;"><i class="fas fa-plus"></i> Agregar empresa</a></li>
           <li><a href="#" onclick="mostrarMensaje()" style="display: block; padding: 10px; color: #333; text-decoration: none; border-radius: 10px;"><i class="fas fa-toggle-on"></i> Habilitar / Deshabilitar</a></li>
           <li><a href="#" onclick="mostrarMensaje()" style="display: block; padding: 10px; color: #333; text-decoration: none; border-radius: 10px;"><i class="fas fa-edit"></i> Modificar</a></li>
-          <li><a href="#" style="display: block; padding: 10px; color: #ff4d4f; text-decoration: none; border-radius: 10px;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+          <li><a href="#" id="btn_salir" style="display: block; padding: 10px; color: #ff4d4f; text-decoration: none; border-radius: 10px;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
         </ul>
       </nav>
     </aside>
@@ -66,7 +66,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
     import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -82,6 +82,21 @@
     const auth = getAuth(app);
     const storage = getStorage(app);
 
+    // 🔒 Proteger el acceso
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "/Clicon-HTML/login/index.html";
+      }
+    });
+
+    // 🔚 Botón salir
+    document.getElementById("btn_salir").addEventListener("click", async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = "/Clicon-HTML/login/index.html";
+    });
+
+    // Crear empresa
     document.addEventListener("click", async (e) => {
       if (e.target && e.target.id === "btn_crear_empresa") {
         const nombreOriginal = document.getElementById("nombre_empresa")?.value.trim();
