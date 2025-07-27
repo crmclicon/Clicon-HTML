@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    async function cargarClientes() {
+      const archivoRef = ref(storage, "sanvicenteautomotores/historial_cartera/cartera de pruebas.xlsx");
+
+      try {
+        const url = await getDownloadURL(archivoRef);
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const hoja = workbook.Sheets[workbook.SheetNames[0]];
+        const datos = XLSX.utils.sheet_to_json(hoja);
+
+        const contenedor = document.getElementById("clientes");
+        contenedor.innerHTML = "";
+        datos.forEach(cliente => {
+          const tarjeta = document.createElement("div");
+          tarjeta.className = "tarjeta";
+          tarjeta.innerHTML = `
+            <h3><strong>${cliente.NOMBRE_SUSCRIPTOR || "Nombre no disponible"}</strong></h3>
+            <p>Teléfono: ${cliente.TELEFONO || "-"}</p>
+            <p>Vendedor: ${cliente.VENDEDOR || "-"}</p>
+            <p>Cuotas pagas: ${cliente.CUOTAS_PAGAS || 0} | Cuotas impagas: ${cliente.CUOTAS_IMPAGAS || 0}</p>
+            <p>Estado del plan: ${cliente.ESTADO_PLAN || "-"}</p>
+            <button>Ver más</button>
+          `;
+          contenedor.appendChild(tarjeta);
+        });
+
+      } catch (error) {
+        console.error("Error al cargar la cartera:", error);
+        alert("No se pudo cargar la cartera.");
+      }
+    }
+
+    window.onload = cargarClientes;
+  </script>
+  <style>
+    body {
+      background-color: #F8FBFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      padding: 40px;
+    }
+    h2 {
+      font-size: 28px;
+      color: #3399FF;
+      margin-bottom: 30px;
+    }
+    .tarjeta {
+      background: white;
+      border: 1px solid #D0E3FF;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 320px;
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 20px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #3399FF;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Clientes</h2>
+  <div id="clientes"></div>
+</body>
+</html>
