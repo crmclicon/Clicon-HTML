@@ -50,13 +50,17 @@
         const datos = XLSX.utils.sheet_to_json(hoja);
 
         const cuerpo = document.getElementById("tabla-mora");
+        const contador = document.getElementById("contador-mora");
         cuerpo.innerHTML = "";
+
+        let cantidad = 0;
 
         datos.forEach(cliente => {
           const estado = cliente.ESTADO_CONTRATO || "";
           const deuda = String(cliente.NRO_CUOTAS_IMPAGAS || "");
 
           if (estado === "N0 - Ahorrista" && deuda.trim() !== "") {
+            cantidad++;
             const fila = document.createElement("tr");
             fila.innerHTML = `
               <td>${cliente.NOMBRE_SUSCRIPTOR || "-"}</td>
@@ -66,6 +70,8 @@
             cuerpo.appendChild(fila);
           }
         });
+
+        contador.textContent = `Clientes en mora: ${cantidad}`;
 
       } catch (error) {
         console.error("Error al cargar la mora:", error);
@@ -84,7 +90,12 @@
     h2 {
       font-size: 28px;
       color: #3399FF;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
+    }
+    #contador-mora {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #333;
     }
     table {
       width: 100%;
@@ -109,6 +120,7 @@
 </head>
 <body>
   <h2>MORA</h2>
+  <div id="contador-mora">Clientes en mora: 0</div>
   <table>
     <thead>
       <tr>
