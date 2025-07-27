@@ -287,12 +287,12 @@
       modal.className = "modal";
       modal.innerHTML = `
         <h3>Cliente encontrado</h3>
-        <p><b>Nombre:</b> ${c.NOMBRE_SUSCRIPTOR || "?"}</p>
-        <p><b>Teléfono:</b> ${c.TELEFONO_SUSCRIPTOR || "?"}</p>
-        <p><b>G-O:</b> ${c.CONTRATO || "?"}</p>
-        <p><b>Estado:</b> ${c.ESTADO_CONTRATO || "?"}</p>
-        <p><b>Ctas pagas:</b> ${c.CANT_CUOTAS_PAGAS || "?"}</p>
-        <p><b>Ctas emitidas:</b> ${c.ULT_CUOTA_EMITIDA || "?"}</p>
+        <p><b>Nombre:</b> ${c.NOMBRE_SUSCRIPTOR ?? "?"}</p>
+        <p><b>Teléfono:</b> ${c.TELEFONO_SUSCRIPTOR ?? "?"}</p>
+        <p><b>G-O:</b> ${c.CONTRATO ?? "?"}</p>
+        <p><b>Estado:</b> ${c.ESTADO_CONTRATO ?? "?"}</p>
+        <p><b>Ctas pagas:</b> ${c.CANT_CUOTAS_PAGAS != null ? c.CANT_CUOTAS_PAGAS : "?"}</p>
+        <p><b>Ctas emitidas:</b> ${c.ULT_CUOTA_EMITIDA != null ? c.ULT_CUOTA_EMITIDA : "?"}</p>
         <button id="cerrarModal">Cerrar</button>
       `;
       document.body.appendChild(modal);
