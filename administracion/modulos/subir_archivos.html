@@ -67,7 +67,11 @@
         const nuevoLibro = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(nuevoLibro, nuevaHoja, "Hoja1");
 
-        const blob = XLSX.write(nuevoLibro, { type: "blob", bookType: "xlsx" });
+        const arrayBuffer = XLSX.write(nuevoLibro, { bookType: "xlsx", type: "array" });
+        const blob = new Blob([arrayBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
         const rutaBase = "sanvicenteautomotores/historial_cartera/";
         const storageFolder = ref(storage, rutaBase);
 
