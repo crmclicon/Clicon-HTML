@@ -86,8 +86,15 @@
 
   <script>
     function cargarModulo(nombre, boton) {
-      document.getElementById("contenido").innerHTML = `<h2>Estamos trabajando en este módulo: ${nombre}</h2>`;
       activarBotonActivo(boton);
+
+      if (nombre === "CREAR USUARIO") {
+        document.getElementById("contenido").innerHTML =
+          `<iframe src="modulos/crear_usuario_rol.html"></iframe>`;
+      } else {
+        document.getElementById("contenido").innerHTML =
+          `<h2>Estamos trabajando en este módulo: ${nombre}</h2>`;
+      }
     }
 
     function cargarIframe(ruta, boton) {
