@@ -129,7 +129,7 @@
         const datos = XLSX.utils.sheet_to_json(hoja);
 
         procesarEstadisticas(datos);
-        window._clientes = datos; // lo guardamos global para búsqueda
+        window._clientes = datos;
       } catch (e) {
         console.error("Error al cargar datos:", e);
       }
@@ -225,13 +225,14 @@
       });
     }
 
-    // Buscar cliente al presionar Enter
-    const inputBuscar = document.querySelector("input[type='text']");
-    inputBuscar.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        buscarCliente(inputBuscar.value.trim().toLowerCase());
-      }
-    });
+    window.onload = () => {
+      const inputBuscar = document.querySelector("input[type='text']");
+      inputBuscar.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          buscarCliente(inputBuscar.value.trim().toLowerCase());
+        }
+      });
+    };
 
     function buscarCliente(valor) {
       if (!valor || !window._clientes) return;
