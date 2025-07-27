@@ -73,6 +73,10 @@
     firebase.initializeApp(firebaseConfig);
     const storage = firebase.storage();
 
+    function porcentaje(valor, total) {
+      return total === 0 ? 0 : Math.round((valor / total) * 100);
+    }
+
     async function cargarDatos() {
       const carpetaRef = storage.ref("sanvicenteautomotores/historial_cartera");
       try {
@@ -104,13 +108,15 @@
       clientes.forEach(c => {
         const estado = (c.ESTADO_CONTRATO || "").trim().toUpperCase();
         const deuda = (c.NRO_CUOTAS_IMPAGAS || "").toString().trim();
-        if (estado === "N0") {
+        if (estado === "N0" || estado === "AHORRISTA") {
           activos++;
           if (deuda && deuda !== "0") mora++;
-        } else if (estado === "R0" || estado === "R2") {
+        } else if (estado === "R0" || estado === "RENUNCIADO" || estado === "R2" || estado === "RESCINDIDO") {
           inactivos++;
         }
       });
+
+      const total = clientes.length;
 
       document.getElementById("activosCount").textContent = activos;
       document.getElementById("inactivosCount").textContent = inactivos;
@@ -119,37 +125,70 @@
       new Chart(document.getElementById("activosChart"), {
         type: "doughnut",
         data: {
-          labels: ["Activos", ""],
+          labels: ["Activos", "Otros"],
           datasets: [{
-            data: [activos, 1],
+            data: [activos, total - activos],
             backgroundColor: ["#33cc33", "#eee"]
           }]
         },
-        options: { cutout: "70%" }
+        options: {
+          cutout: "70%",
+          plugins: {
+            title: {
+              display: true,
+              text: `Activos: ${porcentaje(activos, total)}%`,
+              position: 'bottom',
+              font: { size: 14 }
+            },
+            legend: { display: false }
+          }
+        }
       });
 
       new Chart(document.getElementById("inactivosChart"), {
         type: "doughnut",
         data: {
-          labels: ["Inactivos", ""],
+          labels: ["Inactivos", "Otros"],
           datasets: [{
-            data: [inactivos, 1],
+            data: [inactivos, total - inactivos],
             backgroundColor: ["#ff9900", "#eee"]
           }]
         },
-        options: { cutout: "70%" }
+        options: {
+          cutout: "70%",
+          plugins: {
+            title: {
+              display: true,
+              text: `Inactivos: ${porcentaje(inactivos, total)}%`,
+              position: 'bottom',
+              font: { size: 14 }
+            },
+            legend: { display: false }
+          }
+        }
       });
 
       new Chart(document.getElementById("moraChart"), {
         type: "doughnut",
         data: {
-          labels: ["En mora", ""],
+          labels: ["En mora", "Sin mora"],
           datasets: [{
-            data: [mora, 1],
+            data: [mora, activos - mora],
             backgroundColor: ["#9999FF", "#eee"]
           }]
         },
-        options: { cutout: "70%" }
+        options: {
+          cutout: "70%",
+          plugins: {
+            title: {
+              display: true,
+              text: `En mora: ${porcentaje(mora, activos)}%`,
+              position: 'bottom',
+              font: { size: 14 }
+            },
+            legend: { display: false }
+          }
+        }
       });
     }
 
