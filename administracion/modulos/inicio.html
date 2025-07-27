@@ -84,10 +84,12 @@
         const archivos = lista.items;
         if (archivos.length === 0) return;
 
-        archivos.sort((a, b) => a.name.localeCompare(b.name));
-        const archivoMasNuevo = archivos[archivos.length - 1];
+        const metadatas = await Promise.all(archivos.map(a => a.getMetadata()));
+        const index = metadatas.reduce((max, m, i, arr) =>
+          new Date(m.updated) > new Date(arr[max].updated) ? i : max, 0
+        );
+        const archivoURL = await archivos[index].getDownloadURL();
 
-        const archivoURL = await archivoMasNuevo.getDownloadURL();
         const res = await fetch(archivoURL);
         const arrayBuffer = await res.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: "array" });
@@ -104,16 +106,12 @@
       let activos = 0, inactivos = 0, mora = 0;
 
       clientes.forEach(c => {
-        const estado = (c.ESTADO_CONTRATO || "").toUpperCase();
+        const estado = (c.ESTADO_CONTRATO || "").trim().toUpperCase();
         const deuda = (c.NRO_CUOTAS_IMPAGAS || "").toString().trim();
-
-        const esActivo = estado.includes("N0") || estado.includes("AHORRISTA");
-        const esInactivo = estado.includes("R0") || estado.includes("RENUNCIADO") || estado.includes("R2") || estado.includes("RESCINDIDO");
-
-        if (esActivo) {
+        if (estado === "N0 - AHORRISTA") {
           activos++;
           if (deuda && deuda !== "0") mora++;
-        } else if (esInactivo) {
+        } else if (["R0 - RENUNCIADO", "R2 - RESCINDIDO"].includes(estado)) {
           inactivos++;
         }
       });
@@ -127,7 +125,7 @@
       new Chart(document.getElementById("activosChart"), {
         type: "doughnut",
         data: {
-          labels: ["Activos", "No activos"],
+          labels: ["Activos", "Otros"],
           datasets: [{
             data: [activos, total - activos],
             backgroundColor: ["#33cc33", "#eee"]
@@ -138,7 +136,7 @@
           plugins: {
             title: {
               display: true,
-              text: `${porcentaje(activos, total)}% activos`,
+              text: `Activos: ${porcentaje(activos, total)}%`,
               position: 'bottom',
               font: { size: 14 }
             },
@@ -161,7 +159,7 @@
           plugins: {
             title: {
               display: true,
-              text: `${porcentaje(inactivos, total)}% inactivos`,
+              text: `Inactivos: ${porcentaje(inactivos, total)}%`,
               position: 'bottom',
               font: { size: 14 }
             },
@@ -184,7 +182,7 @@
           plugins: {
             title: {
               display: true,
-              text: `${porcentaje(mora, activos)}% en mora`,
+              text: `En mora: ${porcentaje(mora, activos)}%`,
               position: 'bottom',
               font: { size: 14 }
             },
