@@ -102,36 +102,24 @@
     </div>
     <button onclick="cargarIframe('modulos/inicio.html', this)">Inicio</button>
     <button onclick="cargarIframe('modulos/clientes.html', this)">Clientes</button>
-    <button onclick="cargarModulo('BOT-WHATSAPP', this)">Bot-Whatsapp</button>
+    <button onclick="cargarIframe('modulos/bot_whatsapp.html', this)">Bot-Whatsapp</button>
     <button onclick="cargarIframe('modulos/subir_archivos.html', this)">Subir archivos</button>
-    <button onclick="cargarModulo('SCORING', this)">Scoring</button>
+    <button onclick="cargarIframe('modulos/scoring.html', this)">Scoring</button>
     <button onclick="cargarIframe('modulos/moras.html', this)">Moras</button>
-    <button onclick="cargarModulo('NOMINA', this)">Nomina</button>
-    <button onclick="cargarModulo('DESCARGAR-CUOTA', this)">Descargar-Cuota</button>
-    <button onclick="cargarModulo('CAMPAÑAS', this)">Campañas</button>
-    <button onclick="cargarModulo('CREAR USUARIO', this)">Crear usuario</button>
-    <button onclick="cargarModulo('CAMBIOS DE ESTADO', this)">Cambios de estado</button>
-    <button onclick="cargarModulo('SIN USO 12', this)">Sin uso 12</button>
-    <button onclick="cargarModulo('SIN USO 13', this)">Sin uso 13</button>
-    <button onclick="cargarModulo('SALIR', this)">Salir</button>
+    <button onclick="cargarIframe('modulos/nomina.html', this)">Nomina</button>
+    <button onclick="cargarIframe('modulos/descargar_cuota.html', this)">Descargar-Cuota</button>
+    <button onclick="cargarIframe('modulos/campañas.html', this)">Campañas</button>
+    <button onclick="cargarIframe('modulos/crear_usuario.html', this)">Crear usuario</button>
+    <button onclick="cargarIframe('modulos/cambios_estado.html', this)">Cambios de estado</button>
+    <button onclick="cargarIframe('modulos/sin_uso_12.html', this)">Sin uso 12</button>
+    <button onclick="cargarIframe('modulos/sin_uso_13.html', this)">Sin uso 13</button>
+    <button onclick="cargarIframe('modulos/salir.html', this)">Salir</button>
   </aside>
   <main id="contenido">
     <h2>Bienvenido al panel administrativo</h2>
   </main>
 
   <script>
-    function cargarModulo(nombre, boton) {
-      activarBotonActivo(boton);
-
-      if (nombre === "CREAR USUARIO") {
-        document.getElementById("contenido").innerHTML =
-          `<iframe src="modulos/crear_usuario_rol.html"></iframe>`;
-      } else {
-        document.getElementById("contenido").innerHTML =
-          `<h2>Estamos trabajando en este módulo: ${nombre}</h2>`;
-      }
-    }
-
     function cargarIframe(ruta, boton) {
       document.getElementById("contenido").innerHTML = `<iframe src="${ruta}"></iframe>`;
       activarBotonActivo(boton);
