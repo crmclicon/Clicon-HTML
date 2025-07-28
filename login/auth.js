@@ -28,10 +28,12 @@ window.addEventListener("DOMContentLoaded", () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       console.log("✅ Login OK:", userCredential.user);
       const uid = userCredential.user.uid;
-      console.log("🆔 UID:", uid);  // 👉 Agregado para debug
+      console.log("🆔 UID:", uid);
 
       const docRef = doc(db, "usuarios", uid);
       const docSnap = await getDoc(docRef);
+
+      console.log("📄 Documento cargado:", docSnap.exists(), docSnap.data());  // 👉 agregado
 
       if (docSnap.exists()) {
         const data = docSnap.data();
