@@ -109,11 +109,11 @@
     const db = getFirestore();
     const functions = getFunctions();
 
-    // ⛔ Verifica que el usuario esté logueado
-    onAuthStateChanged(auth, (user) => {
+    // Verifica sesión y redirige desde iframe
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         alert("No estás autenticado");
-        window.location.href = "/index.html";
+        window.top.location.href = "/index.html";
       }
     });
 
