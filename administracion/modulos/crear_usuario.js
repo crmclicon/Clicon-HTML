@@ -39,7 +39,7 @@ async function iniciar() {
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         alert("No estás autenticado");
-        window.top.location.href = "/Clicon-HTML/login.html";
+        window.top.location.href = "/Clicon-HTML/login/login.html";
       }
     });
   }, 500);
