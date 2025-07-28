@@ -83,8 +83,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -101,7 +101,7 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        window.location.href = "/index.html";
+        window.location.href = "login/login.html";
         return;
       }
 
@@ -111,7 +111,7 @@
 
       if (!data || data.rol !== "administrador") {
         alert("Acceso restringido");
-        window.location.href = "/index.html";
+        window.location.href = "login/login.html";
         return;
       }
 
@@ -119,15 +119,14 @@
       document.querySelector("h2").textContent = `Hola, ${nombre}`;
     });
 
-    // Crear nuevo usuario
-    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
     window.crearNuevoUsuario = async function () {
       const email = document.getElementById("nuevoEmail").value;
       const password = document.getElementById("nuevaClave").value;
       const nombre = document.getElementById("nuevoNombre").value;
       const rol = document.getElementById("nuevoRol").value;
+
+      const adminEmail = auth.currentUser.email;
+      const adminPass = prompt("Reingresá tu contraseña para mantener la sesión:");
 
       try {
         const credenciales = await createUserWithEmailAndPassword(auth, email, password);
@@ -139,7 +138,10 @@
           rol
         });
 
-        alert("✅ Usuario creado correctamente");
+        // Restaurar sesión del admin
+        await signInWithEmailAndPassword(auth, adminEmail, adminPass);
+
+        alert("✅ Usuario creado y sesión restaurada");
         document.getElementById("nuevoEmail").value = "";
         document.getElementById("nuevaClave").value = "";
         document.getElementById("nuevoNombre").value = "";
