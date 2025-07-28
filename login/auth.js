@@ -48,7 +48,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (rol === "propietario") {
           window.location.href = "/clicon-html/propietario/propietario.html";
         } else if (rol === "administrador") {
-          window.location.href = "/clicon-html/administracion/administracion.html";
+          window.location.href = "/Clicon-HTML/administracion/administracion.html";
         } else if (rol === "gerente") {
           window.location.href = "/clicon-html/gerente/";
         } else if (rol === "supervisor") {
