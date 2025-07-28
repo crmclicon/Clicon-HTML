@@ -37,7 +37,7 @@ await setPersistence(auth, browserLocalPersistence);
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("No estás autenticado");
-    window.top.location.href = "/index.html";
+    window.top.location.href = "/Clicon-HTML/login.html";
   }
 });
 
