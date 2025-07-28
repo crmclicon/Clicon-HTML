@@ -86,12 +86,16 @@
 
       const docRef = doc(db, "usuarios", user.uid);
       const docSnap = await getDoc(docRef);
-      const rol = docSnap.data()?.rol;
+      const data = docSnap.data();
 
-      if (rol !== "administrador") {
+      if (!data || data.rol !== "administrador") {
         alert("Acceso restringido");
         window.location.href = "/index.html";
+        return;
       }
+
+      const nombre = data.nombre || "Administrador";
+      document.querySelector("h2").textContent = `Hola, ${nombre}`;
     });
   </script>
 </head>

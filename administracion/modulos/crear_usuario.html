@@ -91,8 +91,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDocs, collection, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, getDocs, collection, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-functions.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -106,6 +107,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const db = getFirestore();
+    const functions = getFunctions();
 
     window.crearUsuario = async function () {
       const nombre = document.getElementById("nombre").value;
@@ -113,18 +115,11 @@
       const password = document.getElementById("password").value;
       const rol = document.getElementById("rol").value;
 
+      const crearUsuarioFn = httpsCallable(functions, "crearUsuarioDesdePanel");
+
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-
-        await setDoc(doc(db, "usuarios", uid), {
-          nombre: nombre,
-          email: email,
-          rol: rol,
-          activo: true
-        });
-
-        alert("Usuario creado con éxito");
+        const result = await crearUsuarioFn({ email, password, rol, nombre });
+        alert(result.data.mensaje);
         cargarUsuarios();
       } catch (error) {
         alert("Error: " + error.message);

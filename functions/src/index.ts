@@ -1,6 +1,8 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 
 initializeApp();
 
@@ -28,3 +30,31 @@ export const crearCarpetasEmpresa = onDocumentCreated("empresas/{empresaId}", as
 
   console.log(`Carpetas creadas para empresa ${nombreEmpresa}`);
 });
+
+export const crearUsuarioDesdePanel = functions.https.onCall(
+  async (data: any, context: any) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError("unauthenticated", "No estás autenticado");
+    }
+
+    const { email, password, rol, nombre } = data;
+
+    try {
+      const userRecord = await admin.auth().createUser({
+        email,
+        password
+      });
+
+      await admin.firestore().collection("usuarios").doc(userRecord.uid).set({
+        email,
+        rol,
+        nombre,
+        activo: true
+      });
+
+      return { mensaje: "Usuario creado correctamente" };
+    } catch (error: any) {
+      throw new functions.https.HttpsError("internal", error.message);
+    }
+  }
+);
