@@ -31,18 +31,20 @@ const auth = getAuth();
 const db = getFirestore();
 const functions = getFunctions();
 
-// Espera breve antes de verificar autenticación
+// Verifica si está autenticado (espera para evitar error por iframe)
 async function iniciar() {
   await setPersistence(auth, browserLocalPersistence);
 
-  setTimeout(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        alert("No estás autenticado");
-        window.top.location.href = "https://crmclicon.github.io/Clicon-HTML/login/login.html";
-      }
-    });
-  }, 500);
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      setTimeout(() => {
+        if (!auth.currentUser) {
+          alert("Sesión no detectada");
+          window.location.href = "https://crmclicon.github.io/Clicon-HTML/login/login.html";
+        }
+      }, 1000);
+    }
+  });
 }
 
 iniciar();
