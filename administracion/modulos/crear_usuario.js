@@ -31,16 +31,18 @@ const auth = getAuth();
 const db = getFirestore();
 const functions = getFunctions();
 
-// ⛔ IMPORTANTE: setPersistence debe ir dentro de una función async
+// Espera breve antes de verificar autenticación
 async function iniciar() {
   await setPersistence(auth, browserLocalPersistence);
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      alert("No estás autenticado");
-      window.top.location.href = "/Clicon-HTML/login.html";
-    }
-  });
+  setTimeout(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("No estás autenticado");
+        window.top.location.href = "/Clicon-HTML/login.html";
+      }
+    });
+  }, 500);
 }
 
 iniciar();
