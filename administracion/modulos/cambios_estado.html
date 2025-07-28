@@ -80,33 +80,64 @@
 
   <p class="nota">Estos cambios permanecerán visibles hasta la próxima carga de cartera.</p>
 
-  <script>
-    const cambios = [
-      { Cliente: "VILLAR NORMA EDITH", Contrato: "H2KQ099-V", Campo: "ESTADO_CONTRATO", Antes: "R2 - Rescindido", Ahora: "N0 - Ahorrista" },
-      { Cliente: "RODRIGUEZ ANTONIO FABIÁN", Contrato: "H2KU050-G", Campo: "ESTADO_CONTRATO", Antes: "R2 - Rescindido", Ahora: "N0 - Ahorrista" },
-      { Cliente: "PEZOA RAFAEL REYNALDO", Contrato: "H2KX036-H", Campo: "MEDIO_DE_PAGO", Antes: "VISA", Ahora: "" },
-      { Cliente: "MORIENGA CESAR EDGARDO", Contrato: "P3NV209-Q", Campo: "ESTADO_CONTRATO", Antes: "R2 - Rescindido", Ahora: "N0 - Ahorrista" },
-      { Cliente: "MERLO JAVIER OSMAR", Contrato: "P4DA077-B", Campo: "MEDIO_DE_PAGO", Antes: "DBCT", Ahora: "" }
-    ];
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getStorage, ref, listAll } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
-    const tbody = document.querySelector("#tablaCambios tbody");
-    cambios.forEach(c => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${c.Cliente}</td><td>${c.Contrato}</td><td>${c.Campo}</td><td>${c.Antes}</td><td>${c.Ahora}</td>`;
-      tbody.appendChild(tr);
-    });
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial.appspot.com",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    async function obtenerUltimosArchivos() {
+      const carpeta = ref(storage, "historial_carteras");
+      const lista = await listAll(carpeta);
+
+      const archivosOrdenados = lista.items
+        .map(item => ({
+          nombre: item.name,
+          referencia: item
+        }))
+        .filter(item => item.nombre.endsWith(".xlsx"))
+        .sort((a, b) => {
+          const fechaA = extraerFecha(a.nombre);
+          const fechaB = extraerFecha(b.nombre);
+          return fechaB - fechaA;
+        });
+
+      const ultimos2 = archivosOrdenados.slice(-2);
+      console.log("Últimos 2 archivos encontrados:", ultimos2.map(a => a.nombre));
+
+      // Próximo paso: descargar y comparar
+    }
+
+    function extraerFecha(nombre) {
+      const partes = nombre.replace(".xlsx", "").split("-");
+      return new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+    }
+
+    obtenerUltimosArchivos();
+  </script>
+
+  <script>
+    function exportarExcel() {
+      alert("Función de exportar aún no implementada");
+    }
 
     function filtrarTabla() {
       const filtro = document.getElementById("buscador").value.toLowerCase();
-      const filas = tbody.getElementsByTagName("tr");
+      const filas = document.querySelector("#tablaCambios tbody").getElementsByTagName("tr");
       for (let i = 0; i < filas.length; i++) {
         const textoFila = filas[i].innerText.toLowerCase();
         filas[i].style.display = textoFila.includes(filtro) ? "" : "none";
       }
-    }
-
-    function exportarExcel() {
-      alert("Función de exportar aún no implementada");
     }
   </script>
 </body>
