@@ -28,12 +28,19 @@ window.addEventListener("DOMContentLoaded", () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       const uid = userCredential.user.uid;
 
-      // Buscar rol del usuario
+      // Buscar rol y estado del usuario
       const docRef = doc(db, "usuarios", uid);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        const rol = docSnap.data().rol;
+        const data = docSnap.data();
+
+        if (data.activo === false) {
+          alert("Este usuario está deshabilitado");
+          return;
+        }
+
+        const rol = data.rol;
 
         if (rol === "propietario") {
           window.location.href = "/Clicon-HTML/propietario/propietario.html";
