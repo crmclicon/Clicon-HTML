@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cambios de estado</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background-color: #F8FBFF;
+      margin: 0;
+      padding: 40px;
+    }
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+    th {
+      background-color: #f0f4f8;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fcff;
+    }
+    .nota {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #666;
+    }
+    .boton-exportar {
+      padding: 10px 16px;
+      background-color: #3399ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      float: right;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Cambios de estado</h2>
+  <button class="boton-exportar" onclick="exportarExcel()">Exportar a Excel</button>
+  <input type="text" id="buscador" placeholder="🔍 Buscar" onkeyup="filtrarTabla()" />
+
+  <table id="tablaCambios">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Contrato</th>
+        <th>Campo cambiado</th>
+        <th>Antes</th>
+        <th>Ahora</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Aquí se insertan los datos dinámicamente -->
+    </tbody>
+  </table>
+
+  <p class="nota">Estos cambios permanecerán visibles hasta la próxima carga de cartera.</p>
+
+  <script>
+    const cambios = [
+      { Cliente: "VILLAR NORMA EDITH", Contrato: "H2KQ099-V", Campo: "ESTADO_CONTRATO", Antes: "R2 - Rescindido", Ahora: "N0 - Ahorrista" },
+      { Cliente: "RODRIGUEZ ANTONIO FABIÁN", Contrato: "H2KU050-G", Campo: "ESTADO_CONTRATO", Antes: "R2 - Rescindido", Ahora: "N0 - Ahorrista" },
+      { Cliente: "PEZOA RAFAEL REYNALDO", Contrato: "H2KX036-H", Campo: "MEDIO_DE_PAGO", Antes: "VISA", Ahora: "" },
+      { Cliente: "MORIENGA CESAR EDGARDO", Contrato: "P3NV209-Q", Campo: "ESTADO_CONTRATO", Antes: "R2 - Rescindido", Ahora: "N0 - Ahorrista" },
+      { Cliente: "MERLO JAVIER OSMAR", Contrato: "P4DA077-B", Campo: "MEDIO_DE_PAGO", Antes: "DBCT", Ahora: "" }
+    ];
+
+    const tbody = document.querySelector("#tablaCambios tbody");
+    cambios.forEach(c => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${c.Cliente}</td><td>${c.Contrato}</td><td>${c.Campo}</td><td>${c.Antes}</td><td>${c.Ahora}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    function filtrarTabla() {
+      const filtro = document.getElementById("buscador").value.toLowerCase();
+      const filas = tbody.getElementsByTagName("tr");
+      for (let i = 0; i < filas.length; i++) {
+        const textoFila = filas[i].innerText.toLowerCase();
+        filas[i].style.display = textoFila.includes(filtro) ? "" : "none";
+      }
+    }
+
+    function exportarExcel() {
+      alert("Función de exportar aún no implementada");
+    }
+  </script>
+</body>
+</html>
