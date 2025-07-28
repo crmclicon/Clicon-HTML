@@ -31,15 +31,19 @@ const auth = getAuth();
 const db = getFirestore();
 const functions = getFunctions();
 
-// Forzar persistencia de sesión para que funcione en iframe
-await setPersistence(auth, browserLocalPersistence);
+// ⛔ IMPORTANTE: setPersistence debe ir dentro de una función async
+async function iniciar() {
+  await setPersistence(auth, browserLocalPersistence);
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("No estás autenticado");
-    window.top.location.href = "/Clicon-HTML/login.html";
-  }
-});
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("No estás autenticado");
+      window.top.location.href = "/Clicon-HTML/login.html";
+    }
+  });
+}
+
+iniciar();
 
 window.crearUsuario = async function () {
   const nombre = document.getElementById("nombre").value;
