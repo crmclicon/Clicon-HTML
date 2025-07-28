@@ -47,6 +47,7 @@
       flex: 1;
       background-color: #F8FBFF;
       padding: 0;
+      overflow-y: auto;
     }
     iframe {
       width: 100%;
@@ -57,6 +58,26 @@
       font-size: 24px;
       color: #3399FF;
       padding: 40px;
+    }
+    #formulario-crear-usuario {
+      padding: 0 40px 40px;
+    }
+    #formulario-crear-usuario input,
+    #formulario-crear-usuario select {
+      display: block;
+      margin-bottom: 10px;
+      padding: 10px;
+      width: 300px;
+      font-size: 14px;
+    }
+    #formulario-crear-usuario button {
+      background: #3399FF;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
     }
   </style>
 
@@ -97,6 +118,35 @@
       const nombre = data.nombre || "Administrador";
       document.querySelector("h2").textContent = `Hola, ${nombre}`;
     });
+
+    // Crear nuevo usuario
+    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    window.crearNuevoUsuario = async function () {
+      const email = document.getElementById("nuevoEmail").value;
+      const password = document.getElementById("nuevaClave").value;
+      const nombre = document.getElementById("nuevoNombre").value;
+      const rol = document.getElementById("nuevoRol").value;
+
+      try {
+        const credenciales = await createUserWithEmailAndPassword(auth, email, password);
+        const nuevoUID = credenciales.user.uid;
+
+        await setDoc(doc(db, "usuarios", nuevoUID), {
+          email,
+          nombre,
+          rol
+        });
+
+        alert("✅ Usuario creado correctamente");
+        document.getElementById("nuevoEmail").value = "";
+        document.getElementById("nuevaClave").value = "";
+        document.getElementById("nuevoNombre").value = "";
+      } catch (error) {
+        alert("❌ Error: " + error.message);
+      }
+    }
   </script>
 </head>
 <body>
@@ -113,7 +163,7 @@
     <button onclick="cargarIframe('modulos/nomina.html', this)">Nomina</button>
     <button onclick="cargarIframe('modulos/descargar_cuota.html', this)">Descargar-Cuota</button>
     <button onclick="cargarIframe('modulos/campañas.html', this)">Campañas</button>
-    <button onclick="cargarIframe('modulos/crear_usuario.html', this)">Crear usuario</button>
+    <button onclick="activarCrearUsuario(this)">Crear usuario</button>
     <button onclick="cargarIframe('modulos/cambios_estado.html', this)">Cambios de estado</button>
     <button onclick="cargarIframe('modulos/sin_uso_12.html', this)">Sin uso 12</button>
     <button onclick="cargarIframe('modulos/sin_uso_13.html', this)">Sin uso 13</button>
@@ -121,6 +171,20 @@
   </aside>
   <main id="contenido">
     <h2>Bienvenido al panel administrativo</h2>
+
+    <div id="formulario-crear-usuario">
+      <h3>Agregar nuevo usuario</h3>
+      <input type="email" id="nuevoEmail" placeholder="Email">
+      <input type="password" id="nuevaClave" placeholder="Contraseña">
+      <input type="text" id="nuevoNombre" placeholder="Nombre completo">
+      <select id="nuevoRol">
+        <option value="administrador">Administrador</option>
+        <option value="gerente">Gerente</option>
+        <option value="supervisor">Supervisor</option>
+        <option value="vendedor">Vendedor</option>
+      </select>
+      <button onclick="crearNuevoUsuario()">Agregar usuario</button>
+    </div>
   </main>
 
   <script>
@@ -133,6 +197,14 @@
       const botones = document.querySelectorAll('aside button');
       botones.forEach(btn => btn.classList.remove('active'));
       boton.classList.add('active');
+    }
+
+    function activarCrearUsuario(boton) {
+      document.getElementById("contenido").innerHTML = `
+        <h2>Bienvenido al panel administrativo</h2>
+        ${document.getElementById("formulario-crear-usuario").outerHTML}
+      `;
+      activarBotonActivo(boton);
     }
   </script>
 </body>
