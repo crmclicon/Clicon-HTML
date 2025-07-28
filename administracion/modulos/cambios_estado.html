@@ -74,7 +74,7 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Aquí se insertan los datos dinámicamente -->
+      <!-- Datos se cargan acá -->
     </tbody>
   </table>
 
@@ -82,7 +82,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getStorage, ref, listAll } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
@@ -96,34 +96,25 @@
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
 
-    async function obtenerUltimosArchivos() {
-      const carpeta = ref(storage, "historial_carteras");
-      const lista = await listAll(carpeta);
-
-      const archivosOrdenados = lista.items
-        .map(item => ({
-          nombre: item.name,
-          referencia: item
-        }))
-        .filter(item => item.nombre.endsWith(".xlsx"))
-        .sort((a, b) => {
-          const fechaA = extraerFecha(a.nombre);
-          const fechaB = extraerFecha(b.nombre);
-          return fechaB - fechaA;
-        });
-
-      const ultimos2 = archivosOrdenados.slice(-2);
-      console.log("Últimos 2 archivos encontrados:", ultimos2.map(a => a.nombre));
-
-      // Próximo paso: descargar y comparar
+    async function cargarCambiosDesdeJSON() {
+      const archivoRef = ref(storage, "sanvicenteauto/ultimos_cambios/ultimos_cambios.json");
+      const url = await getDownloadURL(archivoRef);
+      const respuesta = await fetch(url);
+      const cambios = await respuesta.json();
+      renderCambios(cambios);
     }
 
-    function extraerFecha(nombre) {
-      const partes = nombre.replace(".xlsx", "").split("-");
-      return new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+    function renderCambios(cambios) {
+      const tbody = document.querySelector("#tablaCambios tbody");
+      tbody.innerHTML = "";
+      cambios.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${c.Cliente}</td><td>${c.Contrato}</td><td>${c.Campo}</td><td>${c.Antes}</td><td>${c.Ahora}</td>`;
+        tbody.appendChild(tr);
+      });
     }
 
-    obtenerUltimosArchivos();
+    cargarCambiosDesdeJSON();
   </script>
 
   <script>
