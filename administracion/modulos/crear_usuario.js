@@ -55,6 +55,9 @@ window.crearUsuario = async function () {
   const password = document.getElementById("password").value;
   const rol = document.getElementById("rol").value;
 
+  // 🔍 Mostrar usuario actual antes de llamar a la función
+  console.log("Usuario actual:", auth.currentUser);
+
   const crearUsuarioFn = httpsCallable(functions, "crearUsuarioDesdePanel");
 
   try {
