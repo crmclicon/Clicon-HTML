@@ -28,6 +28,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       console.log("✅ Login OK:", userCredential.user);
       const uid = userCredential.user.uid;
+      console.log("🆔 UID:", uid);  // 👉 Agregado para debug
 
       const docRef = doc(db, "usuarios", uid);
       const docSnap = await getDoc(docRef);
