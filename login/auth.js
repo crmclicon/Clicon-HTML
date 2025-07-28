@@ -26,9 +26,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      console.log("✅ Login OK:", userCredential.user);
       const uid = userCredential.user.uid;
 
-      // Buscar rol y estado del usuario
       const docRef = doc(db, "usuarios", uid);
       const docSnap = await getDoc(docRef);
 
@@ -60,7 +60,8 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
     } catch (error) {
-      alert("Usuario o contraseña incorrectos");
+      console.error("🔥 ERROR de login:", error.code, error.message);
+      alert("Error: " + error.message);
     }
   });
 });
