@@ -46,15 +46,15 @@ window.addEventListener("DOMContentLoaded", () => {
         const rol = data.rol;
 
         if (rol === "propietario") {
-          window.location.href = "/clicon-html/propietario/propietario.html";
+          window.location.href = "/Clicon-HTML/propietario/propietario.html";
         } else if (rol === "administrador") {
           window.location.href = "/Clicon-HTML/administracion/administracion.html";
         } else if (rol === "gerente") {
-          window.location.href = "/clicon-html/gerente/gerente.html";
+          window.location.href = "/Clicon-HTML/gerente/gerente.html";
         } else if (rol === "supervisor") {
-          window.location.href = "/clicon-html/supervisor/supervisor.html";
+          window.location.href = "/Clicon-HTML/supervisor/supervisor.html";
         } else if (rol === "vendedor") {
-          window.location.href = "/clicon-html/vendedor/vendedor.html";
+          window.location.href = "/Clicon-HTML/vendedor/vendedor.html";
         } else {
           alert("Rol no reconocido");
         }
