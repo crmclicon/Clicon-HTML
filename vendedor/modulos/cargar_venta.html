@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cargar Venta</title>
+
+  <!-- Estilo visual del formulario -->
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
@@ -37,8 +39,12 @@
     }
   </style>
 </head>
+
 <body>
+  <!-- Título del formulario -->
   <h2>Cargar Venta</h2>
+
+  <!-- Formulario de carga de ventas -->
   <form id="ventaForm">
     <input type="text" id="nombre" placeholder="Nombre del cliente" required />
     <input type="text" id="domicilio" placeholder="Domicilio" required />
@@ -52,6 +58,7 @@
     <button type="submit">Cargar venta</button>
   </form>
 
-  <script type="module" src="cargar_venta.js"></script>
+  <!-- Script de lógica: se usa ?v=2 para evitar caché del navegador -->
+  <script type="module" src="cargar_venta.js?v=2"></script>
 </body>
 </html>
