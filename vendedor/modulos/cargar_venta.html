@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cargar Venta</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background-color: #F8FBFF;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      color: #3399FF;
+      margin-bottom: 20px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #3399FF;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #007BFF;
+    }
+  </style>
+</head>
+<body>
+  <h2>Cargar Venta</h2>
+  <form id="ventaForm">
+    <input type="text" id="nombre" placeholder="Nombre del cliente" required />
+    <input type="text" id="domicilio" placeholder="Domicilio" required />
+    <input type="text" id="localidad" placeholder="Localidad" required />
+    <input type="text" id="codigo_postal" placeholder="Código Postal" required />
+    <input type="text" id="telefono" placeholder="Teléfono principal" required />
+    <input type="text" id="telefono_alt" placeholder="Teléfono alternativo" />
+    <input type="email" id="email" placeholder="Email del cliente" />
+    <input type="text" id="dni" placeholder="Nro Documento (DNI)" required />
+    <input type="text" id="fecha_nac" placeholder="Fecha de nacimiento (dd-mm-aaaa)" required />
+    <button type="submit">Cargar venta</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial.firebasestorage.app",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+
+    let currentUserEmail = "";
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUserEmail = user.email;
+      } else {
+        alert("Debes estar logueado");
+        window.location.href = "/index.html";
+      }
+    });
+
+    const form = document.getElementById('ventaForm');
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("⚠️ Parte visual lista. Falta integrar lógica de subida al Excel.");
+    });
+  </script>
+</body>
+</html>
