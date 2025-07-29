@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -53,38 +52,6 @@
     <button type="submit">Cargar venta</button>
   </form>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
-      authDomain: "clicon-oficial.firebaseapp.com",
-      projectId: "clicon-oficial",
-      storageBucket: "clicon-oficial.firebasestorage.app",
-      messagingSenderId: "604078149403",
-      appId: "1:604078149403:web:5da069e8254c3695028dbe"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-
-    let currentUserEmail = "";
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUserEmail = user.email;
-      } else {
-        alert("Debes estar logueado");
-        window.location.href = "/index.html";
-      }
-    });
-
-    const form = document.getElementById('ventaForm');
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      alert("⚠️ Parte visual lista. Falta integrar lógica de subida al Excel.");
-    });
-  </script>
+  <script type="module" src="cargar_venta.js"></script>
 </body>
 </html>
