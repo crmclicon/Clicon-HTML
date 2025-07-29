@@ -45,7 +45,7 @@ document.getElementById("ventaForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    const fileRef = ref(storage, "ventas/historial_ventas.xlsx");
+    const fileRef = ref(storage, 'ventas_globales/ventas_globales.xlsx');
     const url = await getDownloadURL(fileRef);
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
