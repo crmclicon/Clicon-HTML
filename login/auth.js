@@ -50,11 +50,11 @@ window.addEventListener("DOMContentLoaded", () => {
         } else if (rol === "administrador") {
           window.location.href = "/Clicon-HTML/administracion/administracion.html";
         } else if (rol === "gerente") {
-          window.location.href = "/clicon-html/gerente/";
+          window.location.href = "/clicon-html/gerente/gerente.html";
         } else if (rol === "supervisor") {
-          window.location.href = "/clicon-html/supervisor/";
+          window.location.href = "/clicon-html/supervisor/supervisor.html";
         } else if (rol === "vendedor") {
-          window.location.href = "/clicon-html/vendedor/";
+          window.location.href = "/clicon-html/vendedor/vendedor.html";
         } else {
           alert("Rol no reconocido");
         }
