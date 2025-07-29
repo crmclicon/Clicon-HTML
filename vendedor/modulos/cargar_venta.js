@@ -50,7 +50,7 @@ document.getElementById("ventaForm").addEventListener("submit", async (e) => {
 
   try {
     // Ruta correcta al archivo Excel en Firebase Storage
-    const fileRef = ref(storage, 'ventas_globales/ventas_globales.xlsx');
+    const fileRef = ref(storage, 'sanvicenteautomotores/ventas_globales/ventas_globales.xlsx');
     const url = await getDownloadURL(fileRef);
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
