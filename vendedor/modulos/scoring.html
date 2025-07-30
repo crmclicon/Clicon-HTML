@@ -1,0 +1,95 @@
+<!-- scoring_administracion.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scoring Administración</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial.appspot.com",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    async function mostrarVentas() {
+      const archivoRef = ref(storage, "sanvicenteautomotores/ventas/ventas.xlsx");
+
+      try {
+        const url = await getDownloadURL(archivoRef);
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const datos = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        const tabla = document.getElementById("tablaVentas");
+        tabla.innerHTML = ""; // limpiar tabla
+
+        // encabezado
+        const encabezado = Object.keys(datos[0]);
+        encabezado.push("SCORING"); // agregamos columna
+        const trHead = document.createElement("tr");
+        encabezado.forEach(campo => {
+          const th = document.createElement("th");
+          th.textContent = campo;
+          trHead.appendChild(th);
+        });
+        tabla.appendChild(trHead);
+
+        // filas
+        datos.forEach(fila => {
+          const tr = document.createElement("tr");
+          encabezado.forEach(campo => {
+            const td = document.createElement("td");
+            if (campo === "SCORING") {
+              const select = document.createElement("select");
+              ["", "APROBADO", "RECHAZADO", "ANULADO"].forEach(op => {
+                const option = document.createElement("option");
+                option.value = op;
+                option.textContent = op;
+                select.appendChild(option);
+              });
+              td.appendChild(select);
+            } else {
+              td.textContent = fila[campo] || "";
+            }
+            tr.appendChild(td);
+          });
+          tabla.appendChild(tr);
+        });
+
+      } catch (error) {
+        console.error("Error al leer archivo de ventas:", error);
+        alert("No se pudo cargar el archivo.");
+      }
+    }
+
+    window.onload = mostrarVentas;
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 6px;
+    }
+    select {
+      width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Scoring de Ventas</h2>
+  <table id="tablaVentas"></table>
+</body>
+</html>
