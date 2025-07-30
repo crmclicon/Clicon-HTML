@@ -46,7 +46,7 @@
     firebase.initializeApp(firebaseConfig);
     const storage = firebase.storage();
 
-    // 📥 Función principal para cargar las ventas
+    // 📥 Función principal para cargar las ventas filtradas
     async function cargarVentas() {
       const contenedor = document.getElementById("listaVentas");
       const email = localStorage.getItem("email_usuario");
@@ -56,16 +56,20 @@
       }
 
       try {
-        const archivoRef = storage.ref(`sanvicenteautomotores/ventas/${email}.xlsx`);
+        // 📁 Ruta única de archivo de ventas general
+        const archivoRef = storage.ref("sanvicenteautomotores/ventas/ventas.xlsx");
         const url = await archivoRef.getDownloadURL();
         const res = await fetch(url);
         const data = await res.arrayBuffer();
         const wb = XLSX.read(data, { type: "array" });
         const hoja = wb.Sheets[wb.SheetNames[0]];
-        const ventas = XLSX.utils.sheet_to_json(hoja);
+        const todasLasVentas = XLSX.utils.sheet_to_json(hoja);
+
+        // 🔍 Filtrar solo ventas del vendedor actual
+        const ventas = todasLasVentas.filter(v => (v.VENDEDOR || '').toLowerCase() === email.toLowerCase());
 
         if (ventas.length === 0) {
-          contenedor.textContent = "No hay ventas registradas.";
+          contenedor.textContent = "No tenés ventas registradas.";
           return;
         }
 
