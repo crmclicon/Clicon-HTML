@@ -1,0 +1,69 @@
+<!-- Botón que usará el vendedor para ver sus seguimientos -->
+<button id="btnSeguimientos">Mis seguimientos</button>
+
+<!-- Contenedor donde se van a mostrar los clientes asignados -->
+<div id="seguimientosContainer"></div>
+
+<!-- Script principal -->
+<script type="module">
+  // 🔁 Importamos los módulos necesarios de Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+  // 🔐 Configuración del proyecto Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+    authDomain: "clicon-oficial.firebaseapp.com",
+    projectId: "clicon-oficial",
+    storageBucket: "clicon-oficial.appspot.com",
+    messagingSenderId: "604078149403",
+    appId: "1:604078149403:web:5da069e8254c3695028dbe"
+  };
+
+  // 🚀 Inicializamos Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth();           // Autenticación
+  const db = getFirestore();        // Base de datos Firestore
+
+  // 🎯 Cuando el vendedor hace clic en el botón "Mis seguimientos"
+  document.getElementById("btnSeguimientos").addEventListener("click", async () => {
+    
+    // ✅ Verificamos que esté logueado
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Debes iniciar sesión");
+        return;
+      }
+
+      const email = user.email; // Obtenemos su email
+      const container = document.getElementById("seguimientosContainer");
+      container.innerHTML = ""; // Limpiamos resultados anteriores
+
+      // 🔎 Hacemos una consulta en Firestore: todos los documentos de "seguimientos"
+      // donde el campo 'designado' sea igual al email del vendedor actual
+      const q = query(collection(db, "seguimientos"), where("designado", "==", email));
+      const querySnapshot = await getDocs(q);
+
+      // 🧾 Recorremos todos los seguimientos encontrados
+      querySnapshot.forEach((doc) => {
+        const data = doc.data(); // datos del seguimiento
+
+        // 📦 Creamos un cuadrito visual con los datos del cliente
+        const div = document.createElement("div");
+        div.style.border = "1px solid #ccc";
+        div.style.margin = "10px";
+        div.style.padding = "10px";
+
+        // 🖊 Mostramos nombre y teléfono (pueden agregarse más campos)
+        div.innerHTML = `
+          <strong>${data.nombre}</strong><br>
+          Tel: ${data.telefono || "-"}
+        `;
+
+        // 📥 Lo agregamos al contenedor
+        container.appendChild(div);
+      });
+    });
+  });
+</script>
