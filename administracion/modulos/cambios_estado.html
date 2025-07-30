@@ -74,16 +74,18 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Datos se cargan acá -->
+      <!-- 🔽 Datos se cargarán acá desde JSON -->
     </tbody>
   </table>
 
   <p class="nota">Estos cambios permanecerán visibles hasta la próxima carga de cartera.</p>
 
   <script type="module">
+    // 🔧 Inicializa Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
+    // 🔐 Configuración del proyecto Firebase (clicon-oficial)
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
       authDomain: "clicon-oficial.firebaseapp.com",
@@ -96,14 +98,22 @@
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
 
+    // 📥 Carga el archivo JSON que contiene los cambios
     async function cargarCambiosDesdeJSON() {
-      const archivoRef = ref(storage, "sanvicenteauto/ultimos_cambios/ultimos_cambios.json");
-      const url = await getDownloadURL(archivoRef);
-      const respuesta = await fetch(url);
-      const cambios = await respuesta.json();
-      renderCambios(cambios);
+      try {
+        // ✅ Ruta correcta dentro de Firebase Storage
+        const archivoRef = ref(storage, "sanvicenteautomotores/ultimos_cambios/ultimos_cambios.json");
+        const url = await getDownloadURL(archivoRef);
+        const respuesta = await fetch(url);
+        const cambios = await respuesta.json();
+        renderCambios(cambios);
+      } catch (error) {
+        alert("No se pudo cargar el archivo de cambios.");
+        console.error(error);
+      }
     }
 
+    // 🖍️ Muestra los cambios en la tabla
     function renderCambios(cambios) {
       const tbody = document.querySelector("#tablaCambios tbody");
       tbody.innerHTML = "";
@@ -118,10 +128,7 @@
   </script>
 
   <script>
-    function exportarExcel() {
-      alert("Función de exportar aún no implementada");
-    }
-
+    // 🔍 Filtro de búsqueda en la tabla
     function filtrarTabla() {
       const filtro = document.getElementById("buscador").value.toLowerCase();
       const filas = document.querySelector("#tablaCambios tbody").getElementsByTagName("tr");
@@ -129,6 +136,11 @@
         const textoFila = filas[i].innerText.toLowerCase();
         filas[i].style.display = textoFila.includes(filtro) ? "" : "none";
       }
+    }
+
+    // 📤 Exportar (por ahora sin implementar)
+    function exportarExcel() {
+      alert("Función de exportar aún no implementada");
     }
   </script>
 </body>
