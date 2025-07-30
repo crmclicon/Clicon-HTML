@@ -1,13 +1,12 @@
-<!-- Contenedor donde se mostrarán los seguimientos del vendedor -->
+<!-- Contenedor para los seguimientos -->
 <div id="seguimientosContainer"></div>
 
 <script type="module">
-  // 🔁 Importamos Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
   import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-  // 🔐 Configuración Firebase
+  // Configuración Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
     authDomain: "clicon-oficial.firebaseapp.com",
@@ -17,12 +16,12 @@
     appId: "1:604078149403:web:5da069e8254c3695028dbe"
   };
 
-  // 🚀 Inicialización
+  // Inicialización
   const app = initializeApp(firebaseConfig);
   const auth = getAuth();
   const db = getFirestore();
 
-  // ⚡ Apenas el usuario esté logueado, buscamos sus seguimientos
+  // Mostrar seguimientos apenas el usuario esté logueado
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       alert("Debes iniciar sesión");
@@ -33,30 +32,31 @@
     const container = document.getElementById("seguimientosContainer");
     container.innerHTML = "";
 
-    // 🔎 Traemos todos los seguimientos que le fueron asignados
     const q = query(collection(db, "seguimientos"), where("designado", "==", email));
     const querySnapshot = await getDocs(q);
 
-    // 📦 Mostramos cada uno con estilo
     querySnapshot.forEach((doc) => {
       const data = doc.data();
 
-      const div = document.createElement("div");
-      div.style.border = "1px solid #ddd";
-      div.style.borderRadius = "12px";
-      div.style.background = "#F8FBFF";
-      div.style.padding = "16px";
-      div.style.marginBottom = "16px";
-      div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
-      div.style.fontFamily = "SF Pro Display, sans-serif";
-      div.style.fontSize = "14px";
+      // Contenedor estilizado
+      const card = document.createElement("div");
+      card.style.border = "1px solid #ddd";
+      card.style.borderRadius = "12px";
+      card.style.background = "#F8FBFF";
+      card.style.padding = "16px";
+      card.style.marginBottom = "16px";
+      card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+      card.style.fontFamily = "SF Pro Display, sans-serif";
+      card.style.fontSize = "14px";
 
-      div.innerHTML = `
-        <div style="font-size:16px; font-weight:bold; color:#333;">${data.nombre}</div>
-        <div style="margin-top:6px; color:#555;">📞 ${data.telefono || "-"}</div>
-      `;
+      // Mostrar todos los campos
+      let html = "";
+      for (const campo in data) {
+        html += `<div style="margin-bottom:4px;"><strong>${campo}:</strong> ${data[campo]}</div>`;
+      }
 
-      container.appendChild(div);
+      card.innerHTML = html;
+      container.appendChild(card);
     });
   });
 </script>
