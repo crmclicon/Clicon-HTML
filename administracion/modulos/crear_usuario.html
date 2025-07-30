@@ -64,9 +64,11 @@
 </head>
 <body>
   <h2>Crear usuario</h2>
-  <input type="text" id="nombre" placeholder="Nombre completo">
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Contraseña">
+
+  <!-- 🧾 Formulario para crear nuevo usuario -->
+  <input type="text" id="nombre" placeholder="Nombre completo" autocomplete="off">
+  <input type="email" id="email" placeholder="Email" autocomplete="off">
+  <input type="password" id="password" placeholder="Contraseña" autocomplete="new-password">
   <select id="rol">
     <option value="administrador">Administrador</option>
     <option value="gerente">Gerente</option>
@@ -75,9 +77,10 @@
   </select>
   <button onclick="crearUsuario()">Crear usuario</button>
 
-  <!-- 🔍 Buscador -->
+  <!-- 🔍 Buscador para filtrar usuarios -->
   <input type="text" id="buscador" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()" style="width: 300px; padding: 10px; margin-top: 30px; border-radius: 10px; border: 1px solid #ccc;">
 
+  <!-- 📋 Tabla que muestra los usuarios creados -->
   <table>
     <thead>
       <tr>
@@ -92,6 +95,7 @@
     </tbody>
   </table>
 
+  <!-- 📦 Lógica principal -->
   <script type="module" src="crear_usuario.js"></script>
 </body>
 </html>
