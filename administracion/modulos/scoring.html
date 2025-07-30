@@ -1,13 +1,15 @@
-<!-- scoring_administracion.html -->
 <!DOCTYPE html>
 <html>
 <head>
   <title>Scoring Administración</title>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
-    // Config Firebase
+  <!-- IMPORTA LIBRERÍAS FIREBASE Y XLSX -->
+  <script type="module">
+    // 🔹 Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getStorage, ref, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+
+    // 🔹 Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
       authDomain: "clicon-oficial.firebaseapp.com",
@@ -20,6 +22,7 @@
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
 
+    // 🔹 Función para mostrar ventas
     async function mostrarVentas() {
       const archivoRef = ref(storage, "sanvicenteautomotores/ventas/ventas.xlsx");
 
@@ -33,11 +36,12 @@
         const datos = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
         const tabla = document.getElementById("tablaVentas");
-        tabla.innerHTML = ""; // limpiar tabla
+        tabla.innerHTML = "";
 
-        // encabezado
         const encabezado = Object.keys(datos[0]);
-        encabezado.push("SCORING"); // agregamos columna
+        if (!encabezado.includes("SCORING")) encabezado.push("SCORING");
+
+        // Encabezado
         const trHead = document.createElement("tr");
         encabezado.forEach(campo => {
           const th = document.createElement("th");
@@ -46,7 +50,7 @@
         });
         tabla.appendChild(trHead);
 
-        // filas
+        // Filas
         datos.forEach(fila => {
           const tr = document.createElement("tr");
           encabezado.forEach(campo => {
@@ -57,6 +61,7 @@
                 const option = document.createElement("option");
                 option.value = op;
                 option.textContent = op;
+                if (fila["SCORING"] === op) option.selected = true;
                 select.appendChild(option);
               });
               td.appendChild(select);
@@ -69,27 +74,69 @@
         });
 
       } catch (error) {
-        console.error("Error al leer archivo de ventas:", error);
+        console.error("❌ Error al leer archivo de ventas:", error);
         alert("No se pudo cargar el archivo.");
       }
     }
 
+    // 🔹 Función para guardar cambios
+    async function guardarCambios() {
+      const tabla = document.getElementById("tablaVentas");
+      const filas = Array.from(tabla.querySelectorAll("tr"));
+      const encabezado = Array.from(filas.shift().children).map(th => th.textContent);
+
+      const datosActualizados = filas.map(tr => {
+        const celdas = Array.from(tr.children);
+        const filaObj = {};
+        celdas.forEach((td, i) => {
+          if (encabezado[i] === "SCORING") {
+            const select = td.querySelector("select");
+            filaObj["SCORING"] = select ? select.value : "";
+          } else {
+            filaObj[encabezado[i]] = td.textContent;
+          }
+        });
+        return filaObj;
+      });
+
+      // Genera nuevo Excel
+      const ws = XLSX.utils.json_to_sheet(datosActualizados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Ventas");
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
+      // Sube archivo actualizado
+      const archivoRef = ref(storage, "sanvicenteautomotores/ventas/ventas.xlsx");
+      await uploadBytes(archivoRef, new Uint8Array(excelBuffer));
+      alert("✅ Cambios guardados correctamente.");
+    }
+
+    window.mostrarVentas = mostrarVentas;
+    window.guardarCambios = guardarCambios;
     window.onload = mostrarVentas;
   </script>
+
+  <!-- Librería para Excel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
   <style>
     table, th, td {
-      border: 1px solid black;
+      border: 1px solid #ccc;
       border-collapse: collapse;
       padding: 6px;
     }
     select {
-      width: 100px;
+      width: 110px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
     }
   </style>
 </head>
 <body>
   <h2>Scoring de Ventas</h2>
   <table id="tablaVentas"></table>
+  <button onclick="guardarCambios()">Guardar Cambios</button>
 </body>
 </html>
