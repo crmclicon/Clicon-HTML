@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mis ventas</title>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-storage-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      background-color: #F8FBFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      padding: 30px;
+    }
+    h2 {
+      font-size: 24px;
+      color: #3399FF;
+      margin-bottom: 20px;
+    }
+    .venta {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+    .venta p {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Mis ventas</h2>
+  <div id="listaVentas">Cargando...</div>
+
+  <script>
+    // ⚙️ Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const storage = firebase.storage();
+
+    // 📥 Función principal para cargar las ventas
+    async function cargarVentas() {
+      const contenedor = document.getElementById("listaVentas");
+      const email = localStorage.getItem("email_usuario");
+      if (!email) {
+        contenedor.textContent = "No se encontró el email del usuario.";
+        return;
+      }
+
+      try {
+        const archivoRef = storage.ref(`sanvicenteautomotores/ventas/${email}.xlsx`);
+        const url = await archivoRef.getDownloadURL();
+        const res = await fetch(url);
+        const data = await res.arrayBuffer();
+        const wb = XLSX.read(data, { type: "array" });
+        const hoja = wb.Sheets[wb.SheetNames[0]];
+        const ventas = XLSX.utils.sheet_to_json(hoja);
+
+        if (ventas.length === 0) {
+          contenedor.textContent = "No hay ventas registradas.";
+          return;
+        }
+
+        contenedor.innerHTML = "";
+        ventas.forEach(v => {
+          const div = document.createElement("div");
+          div.className = "venta";
+          div.innerHTML = `
+            <p><b>Nombre:</b> ${v.NOMBRE_SUSCRIPTOR ?? "-"}</p>
+            <p><b>Teléfono:</b> ${v.TELEFONO_SUSCRIPTOR ?? "-"}</p>
+            <p><b>Modelo:</b> ${v.MODELO_SUSCRIPTO ?? "-"}</p>
+            <p><b>Fecha de venta:</b> ${v.FECHA_VENTA ?? "-"}</p>
+          `;
+          contenedor.appendChild(div);
+        });
+      } catch (error) {
+        contenedor.textContent = "No se pudo cargar el archivo de ventas.";
+        console.error(error);
+      }
+    }
+
+    // ▶️ Ejecutar al cargar
+    window.onload = cargarVentas;
+  </script>
+</body>
+</html>
