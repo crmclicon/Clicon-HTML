@@ -1,17 +1,13 @@
-<!-- Botón que usará el vendedor para ver sus seguimientos -->
-<button id="btnSeguimientos">Mis seguimientos</button>
-
-<!-- Contenedor donde se van a mostrar los clientes asignados -->
+<!-- Contenedor donde se mostrarán los seguimientos del vendedor -->
 <div id="seguimientosContainer"></div>
 
-<!-- Script principal -->
 <script type="module">
-  // 🔁 Importamos los módulos necesarios de Firebase
+  // 🔁 Importamos Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
   import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-  // 🔐 Configuración del proyecto Firebase
+  // 🔐 Configuración Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
     authDomain: "clicon-oficial.firebaseapp.com",
@@ -21,49 +17,46 @@
     appId: "1:604078149403:web:5da069e8254c3695028dbe"
   };
 
-  // 🚀 Inicializamos Firebase
+  // 🚀 Inicialización
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth();           // Autenticación
-  const db = getFirestore();        // Base de datos Firestore
+  const auth = getAuth();
+  const db = getFirestore();
 
-  // 🎯 Cuando el vendedor hace clic en el botón "Mis seguimientos"
-  document.getElementById("btnSeguimientos").addEventListener("click", async () => {
-    
-    // ✅ Verificamos que esté logueado
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        alert("Debes iniciar sesión");
-        return;
-      }
+  // ⚡ Apenas el usuario esté logueado, buscamos sus seguimientos
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("Debes iniciar sesión");
+      return;
+    }
 
-      const email = user.email; // Obtenemos su email
-      const container = document.getElementById("seguimientosContainer");
-      container.innerHTML = ""; // Limpiamos resultados anteriores
+    const email = user.email;
+    const container = document.getElementById("seguimientosContainer");
+    container.innerHTML = "";
 
-      // 🔎 Hacemos una consulta en Firestore: todos los documentos de "seguimientos"
-      // donde el campo 'designado' sea igual al email del vendedor actual
-      const q = query(collection(db, "seguimientos"), where("designado", "==", email));
-      const querySnapshot = await getDocs(q);
+    // 🔎 Traemos todos los seguimientos que le fueron asignados
+    const q = query(collection(db, "seguimientos"), where("designado", "==", email));
+    const querySnapshot = await getDocs(q);
 
-      // 🧾 Recorremos todos los seguimientos encontrados
-      querySnapshot.forEach((doc) => {
-        const data = doc.data(); // datos del seguimiento
+    // 📦 Mostramos cada uno con estilo
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
 
-        // 📦 Creamos un cuadrito visual con los datos del cliente
-        const div = document.createElement("div");
-        div.style.border = "1px solid #ccc";
-        div.style.margin = "10px";
-        div.style.padding = "10px";
+      const div = document.createElement("div");
+      div.style.border = "1px solid #ddd";
+      div.style.borderRadius = "12px";
+      div.style.background = "#F8FBFF";
+      div.style.padding = "16px";
+      div.style.marginBottom = "16px";
+      div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+      div.style.fontFamily = "SF Pro Display, sans-serif";
+      div.style.fontSize = "14px";
 
-        // 🖊 Mostramos nombre y teléfono (pueden agregarse más campos)
-        div.innerHTML = `
-          <strong>${data.nombre}</strong><br>
-          Tel: ${data.telefono || "-"}
-        `;
+      div.innerHTML = `
+        <div style="font-size:16px; font-weight:bold; color:#333;">${data.nombre}</div>
+        <div style="margin-top:6px; color:#555;">📞 ${data.telefono || "-"}</div>
+      `;
 
-        // 📥 Lo agregamos al contenedor
-        container.appendChild(div);
-      });
+      container.appendChild(div);
     });
   });
 </script>
