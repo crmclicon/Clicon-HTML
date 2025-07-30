@@ -17,6 +17,7 @@ import {
   httpsCallable
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-functions.js";
 
+// 🔧 Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
   authDomain: "clicon-oficial.firebaseapp.com",
@@ -31,7 +32,7 @@ const auth = getAuth();
 const db = getFirestore();
 const functions = getFunctions();
 
-// Verifica si está autenticado (espera para evitar error por iframe)
+// 🧩 Detectar si hay sesión activa al ingresar
 async function iniciar() {
   await setPersistence(auth, browserLocalPersistence);
 
@@ -49,14 +50,12 @@ async function iniciar() {
 
 iniciar();
 
+// ➕ Crear nuevo usuario desde panel
 window.crearUsuario = async function () {
   const nombre = document.getElementById("nombre").value;
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const rol = document.getElementById("rol").value;
-
-  // 🔍 Mostrar usuario actual antes de llamar a la función
-  console.log("Usuario actual:", auth.currentUser);
 
   const crearUsuarioFn = httpsCallable(functions, "crearUsuarioDesdePanel");
 
@@ -69,23 +68,32 @@ window.crearUsuario = async function () {
   }
 };
 
+// 📥 Cargar todos los usuarios en la tabla
 async function cargarUsuarios() {
   const tabla = document.getElementById("tablaUsuarios");
   tabla.innerHTML = "";
+
   const snapshot = await getDocs(collection(db, "usuarios"));
   snapshot.forEach((docu) => {
     const data = docu.data();
     const fila = document.createElement("tr");
+
+    // Atributo extra para búsqueda (invisible)
+    fila.setAttribute("data-email", data.email.toLowerCase());
+    fila.setAttribute("data-rol", data.rol.toLowerCase());
+
     fila.innerHTML = `
       <td>${data.email}</td>
       <td>${data.rol}</td>
       <td>${data.activo ? "Activo" : "Deshabilitado"}</td>
       <td><button class="btn-deshabilitar" onclick="toggleUsuario('${docu.id}', ${data.activo})">${data.activo ? "Deshabilitar" : "Habilitar"}</button></td>
     `;
+
     tabla.appendChild(fila);
   });
 }
 
+// 🔄 Activar / desactivar usuario
 window.toggleUsuario = async function (uid, estadoActual) {
   await updateDoc(doc(db, "usuarios", uid), {
     activo: !estadoActual
@@ -93,4 +101,18 @@ window.toggleUsuario = async function (uid, estadoActual) {
   cargarUsuarios();
 };
 
+// 🔍 Filtro en la tabla por texto ingresado
+window.filtrarUsuarios = function () {
+  const filtro = document.getElementById("buscador").value.toLowerCase();
+  const filas = document.querySelectorAll("#tablaUsuarios tr");
+
+  filas.forEach(fila => {
+    const email = fila.getAttribute("data-email");
+    const rol = fila.getAttribute("data-rol");
+    const visible = email.includes(filtro) || rol.includes(filtro);
+    fila.style.display = visible ? "" : "none";
+  });
+};
+
+// ⏬ Ejecutar al iniciar
 cargarUsuarios();
