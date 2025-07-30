@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inicio Vendedor</title>
+  <!-- Firebase y librerías necesarias -->
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-storage-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      background-color: #F8FBFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      padding: 30px;
+    }
+    h2 {
+      font-size: 26px;
+      color: #3399FF;
+      margin-bottom: 10px;
+    }
+    .estadisticas {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    canvas {
+      width: 180px !important;
+      height: 180px !important;
+    }
+  </style>
+</head>
+<body>
+  <h2>Inicio - Panel Vendedor</h2>
+
+  <!-- Gráficos de estadística de clientes -->
+  <div class="estadisticas">
+    <div>
+      <canvas id="activosChart"></canvas>
+      <p style="text-align:center">Activos: <b id="activosCount">0</b></p>
+    </div>
+    <div>
+      <canvas id="inactivosChart"></canvas>
+      <p style="text-align:center">Inactivos: <b id="inactivosCount">0</b></p>
+    </div>
+    <div>
+      <canvas id="moraChart"></canvas>
+      <p style="text-align:center">En mora: <b id="moraCount">0</b></p>
+    </div>
+  </div>
+
+  <script>
+    // Configuración base de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const storage = firebase.storage();
+
+    // ⚙️ Función auxiliar para porcentaje
+    function porcentaje(valor, total) {
+      return total === 0 ? 0 : Math.round((valor / total) * 100);
+    }
+
+    // ✅ Cargar cartera más reciente y filtrar por email del vendedor
+    async function cargarDatos() {
+      const emailVendedor = localStorage.getItem("email_usuario")?.toLowerCase();
+      if (!emailVendedor) return alert("Email no disponible");
+
+      const carpetaRef = storage.ref("sanvicenteautomotores/historial_cartera");
+      try {
+        const lista = await carpetaRef.listAll();
+        const archivos = lista.items;
+        if (archivos.length === 0) return;
+
+        // Buscar archivo más reciente
+        const metadatas = await Promise.all(archivos.map(a => a.getMetadata()));
+        const index = metadatas.reduce((max, m, i, arr) =>
+          new Date(m.updated) > new Date(arr[max].updated) ? i : max, 0);
+        const archivoURL = await archivos[index].getDownloadURL();
+
+        // Leer archivo Excel
+        const res = await fetch(archivoURL);
+        const arrayBuffer = await res.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const hoja = workbook.Sheets[workbook.SheetNames[0]];
+        const datos = XLSX.utils.sheet_to_json(hoja);
+
+        // 🔍 Filtrar clientes que pertenecen al vendedor
+        const propios = datos.filter(c => (c.VENDEDOR || '').toLowerCase() === emailVendedor);
+
+        procesarEstadisticas(propios);
+      } catch (e) {
+        console.error("Error al cargar datos:", e);
+      }
+    }
+
+    // 📊 Calcular y mostrar estadísticas del vendedor
+    function procesarEstadisticas(clientes) {
+      let activos = 0, inactivos = 0, mora = 0;
+
+      clientes.forEach(c => {
+        const estado = (c.ESTADO_CONTRATO || "").trim().toUpperCase();
+        const deuda = (c.NRO_CUOTAS_IMPAGAS || "").toString().trim();
+        if (estado === "N0 - AHORRISTA") {
+          activos++;
+          if (deuda && deuda !== "0") mora++;
+        } else if (["R0 - RENUNCIADO", "R2 - RESCINDIDO"].includes(estado)) {
+          inactivos++;
+        }
+      });
+
+      const total = clientes.length;
+      document.getElementById("activosCount").textContent = activos;
+      document.getElementById("inactivosCount").textContent = inactivos;
+      document.getElementById("moraCount").textContent = mora;
+
+      // Gráfico de Activos
+      new Chart(document.getElementById("activosChart"), {
+        type: "doughnut",
+        data: {
+          labels: ["Activos", "Otros"],
+          datasets: [{ data: [activos, total - activos], backgroundColor: ["#33cc33", "#eee"] }]
+        },
+        options: {
+          cutout: "70%",
+          plugins: {
+            title: { display: true, text: `Activos: ${porcentaje(activos, total)}%`, position: 'bottom', font: { size: 14 } },
+            legend: { display: false }
+          }
+        }
+      });
+
+      // Gráfico de Inactivos
+      new Chart(document.getElementById("inactivosChart"), {
+        type: "doughnut",
+        data: {
+          labels: ["Inactivos", "Otros"],
+          datasets: [{ data: [inactivos, total - inactivos], backgroundColor: ["#ff9900", "#eee"] }]
+        },
+        options: {
+          cutout: "70%",
+          plugins: {
+            title: { display: true, text: `Inactivos: ${porcentaje(inactivos, total)}%`, position: 'bottom', font: { size: 14 } },
+            legend: { display: false }
+          }
+        }
+      });
+
+      // Gráfico de Mora
+      new Chart(document.getElementById("moraChart"), {
+        type: "doughnut",
+        data: {
+          labels: ["En mora", "Sin mora"],
+          datasets: [{ data: [mora, activos - mora], backgroundColor: ["#9999FF", "#eee"] }]
+        },
+        options: {
+          cutout: "70%",
+          plugins: {
+            title: { display: true, text: `En mora: ${porcentaje(mora, activos)}%`, position: 'bottom', font: { size: 14 } },
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    // ▶️ Ejecutar al cargar la página
+    window.onload = cargarDatos;
+  </script>
+</body>
+</html>
