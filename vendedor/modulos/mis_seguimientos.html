@@ -1,12 +1,13 @@
-<!-- Contenedor para los seguimientos -->
+<!-- Contenedor donde se mostrarán los seguimientos asignados -->
 <div id="seguimientosContainer"></div>
 
 <script type="module">
+  // 🔁 Importamos Firebase y módulos necesarios
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-  // Configuración Firebase
+  // 🔐 Configuración del proyecto Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
     authDomain: "clicon-oficial.firebaseapp.com",
@@ -16,12 +17,12 @@
     appId: "1:604078149403:web:5da069e8254c3695028dbe"
   };
 
-  // Inicialización
+  // 🚀 Inicializamos Firebase y sus servicios
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth();
-  const db = getFirestore();
+  const auth = getAuth();       // Módulo de autenticación
+  const db = getFirestore();    // Módulo de base de datos Firestore
 
-  // Mostrar seguimientos apenas el usuario esté logueado
+  // ✅ Cuando el usuario esté logueado, cargamos sus seguimientos
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       alert("Debes iniciar sesión");
@@ -30,15 +31,18 @@
 
     const email = user.email;
     const container = document.getElementById("seguimientosContainer");
-    container.innerHTML = "";
+    container.innerHTML = ""; // Limpiamos el contenedor
 
+    // 🔎 Buscamos los seguimientos donde el campo 'designado' coincide con el email del vendedor
     const q = query(collection(db, "seguimientos"), where("designado", "==", email));
     const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
+    // 📦 Por cada documento encontrado, lo mostramos en pantalla
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();     // Obtenemos los datos
+      const docId = docSnap.id;        // Guardamos el ID para poder editarlo luego
 
-      // Contenedor estilizado
+      // 🎨 Creamos una tarjeta visual estilo CliCon
       const card = document.createElement("div");
       card.style.border = "1px solid #ddd";
       card.style.borderRadius = "12px";
@@ -49,14 +53,30 @@
       card.style.fontFamily = "SF Pro Display, sans-serif";
       card.style.fontSize = "14px";
 
-      // Mostrar todos los campos
+      // 🔁 Recorremos todos los campos y los mostramos automáticamente
       let html = "";
       for (const campo in data) {
         html += `<div style="margin-bottom:4px;"><strong>${campo}:</strong> ${data[campo]}</div>`;
       }
 
+      // ✅ Agregamos botones de acción al final
+      html += `
+        <div style="margin-top:10px;">
+          <button style="margin-right:10px;" onclick="marcarEstado('${docId}', 'VENTA')">✅ VENTA</button>
+          <button onclick="marcarEstado('${docId}', 'NO VENTA')">❌ NO VENTA</button>
+        </div>
+      `;
+
       card.innerHTML = html;
       container.appendChild(card);
     });
   });
+
+  // ✏️ Función global para actualizar el campo 'estado' del documento
+  window.marcarEstado = async (docId, nuevoEstado) => {
+    const docRef = doc(getFirestore(), "seguimientos", docId);   // Referencia al documento
+    await updateDoc(docRef, { estado: nuevoEstado });            // Actualizamos solo el campo 'estado'
+    alert(`Cliente marcado como: ${nuevoEstado}`);
+    location.reload();  // Recargamos la página para reflejar el cambio
+  };
 </script>
