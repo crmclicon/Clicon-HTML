@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel Vendedor - CliCon</title>
+
+  <!-- 🎨 Íconos FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
   <style>
     body {
       margin: 0;
@@ -31,8 +34,11 @@
       width: 120px;
     }
 
+    /* 🔘 Botones del menú */
     button {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       width: 100%;
       padding: 12px 20px;
       margin-bottom: 20px;
@@ -51,7 +57,7 @@
       color: #FFF;
     }
 
-    /* 👉 Contenido principal */
+    /* 📄 Zona principal */
     main {
       flex: 1;
       background-color: #F8FBFF;
@@ -70,9 +76,9 @@
       padding: 40px;
     }
 
-    /* ✅ Botón hamburguesa */
+    /* ☰ Botón hamburguesa SIEMPRE visible */
     .menu-toggle {
-      display: none;
+      display: block;
       position: absolute;
       top: 15px;
       left: 15px;
@@ -85,7 +91,7 @@
       z-index: 1000;
     }
 
-    /* 📱 Responsive para móviles */
+    /* 📱 Estilo móvil */
     @media (max-width: 768px) {
       aside {
         position: fixed;
@@ -99,10 +105,6 @@
         left: 0;
       }
 
-      .menu-toggle {
-        display: block;
-      }
-
       main {
         margin-left: 0;
         width: 100%;
@@ -111,12 +113,12 @@
   </style>
 
   <script type="module">
-    // 🔧 Importa módulos de Firebase
+    // 🔧 Firebase: módulos necesarios
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    // 🔐 Configuración de Firebase
+    // 🔐 Configuración del proyecto Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
       authDomain: "clicon-oficial.firebaseapp.com",
@@ -154,32 +156,45 @@
     });
   </script>
 </head>
-
 <body>
   <!-- ☰ Botón hamburguesa -->
   <button class="menu-toggle" onclick="toggleMenu()">☰</button>
 
-  <!-- Menú lateral -->
+  <!-- 📂 Menú lateral con íconos -->
   <aside>
     <div class="logo">
       <img src="logo.png" alt="CLICON logo">
     </div>
-    <button onclick="cargarIframe('modulos/inicio.html', this)">Inicio</button>
-    <button onclick="cargarIframe('modulos/mis_ventas.html', this)">Mis ventas</button>
-    <button onclick="cargarIframe('modulos/mis_seguimientos.html', this)">Mis seguimientos</button>
-    <button onclick="cargarIframe('modulos/scoring.html', this)">Scoring</button>
-    <button onclick="cargarIframe('modulos/moras.html', this)">Moras</button>
-    <button onclick="cargarIframe('modulos/cargar_venta.html', this)">Cargar venta</button>
-    <button onclick="cargarIframe('modulos/salir.html', this)">Salir</button>
+    <button onclick="cargarIframe('modulos/inicio.html', this)">
+      <i class="fas fa-home"></i> Inicio
+    </button>
+    <button onclick="cargarIframe('modulos/mis_ventas.html', this)">
+      <i class="fas fa-dollar-sign"></i> Mis ventas
+    </button>
+    <button onclick="cargarIframe('modulos/mis_seguimientos.html', this)">
+      <i class="fas fa-list-check"></i> Mis seguimientos
+    </button>
+    <button onclick="cargarIframe('modulos/scoring.html', this)">
+      <i class="fas fa-chart-line"></i> Scoring
+    </button>
+    <button onclick="cargarIframe('modulos/moras.html', this)">
+      <i class="fas fa-clock"></i> Moras
+    </button>
+    <button onclick="cargarIframe('modulos/cargar_venta.html', this)">
+      <i class="fas fa-file-circle-plus"></i> Cargar venta
+    </button>
+    <button onclick="cargarIframe('modulos/salir.html', this)">
+      <i class="fas fa-sign-out-alt"></i> Salir
+    </button>
   </aside>
 
-  <!-- Panel derecho -->
+  <!-- 🧾 Zona derecha donde carga el contenido -->
   <main id="contenido">
     <h2>Bienvenido al panel vendedor</h2>
   </main>
 
   <script>
-    // 🔁 Carga módulo dentro del panel derecho
+    // 🔁 Carga módulo en el panel derecho
     function cargarIframe(ruta, boton) {
       document.getElementById("contenido").innerHTML = `<iframe src="${ruta}"></iframe>`;
       activarBotonActivo(boton);
@@ -200,7 +215,7 @@
       }
     }
 
-    // ☰ Muestra/oculta el menú
+    // ☰ Alterna el menú lateral
     function toggleMenu() {
       document.querySelector("aside").classList.toggle("mostrar");
     }
