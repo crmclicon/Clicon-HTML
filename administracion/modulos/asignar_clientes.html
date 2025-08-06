@@ -1,102 +1,249 @@
-<script type="module">
-  // 🔌 Importar módulos necesarios de Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  import { getStorage, listAll, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asignar Clientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FBFF;
+      padding: 20px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #3399FF; /* 🔵 Azul CliCon */
+    }
+    .buscador {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+    }
+    .tabla-clientes {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+    }
+    .tabla-clientes th, .tabla-clientes td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
+      text-align: left;
+    }
+    .tabla-clientes th {
+      background-color: #f0f4f8;
+    }
+    .selector-usuario {
+      padding: 6px;
+      width: 100%;
+    }
+    .btn-actualizar {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #3399FF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .mensaje-final {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e7f5e6;
+      border-left: 4px solid #34a853;
+      color: #2b662e;
+      display: none;
+    }
+  </style>
+</head>
+<body>
 
-  // 🔐 Configuración de Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
-    authDomain: "clicon-oficial.firebaseapp.com",
-    projectId: "clicon-oficial",
-    storageBucket: "clicon-oficial.appspot.com",
-    messagingSenderId: "604078149403",
-    appId: "1:604078149403:web:5da069e8254c3695028dbe"
-  };
+  <h2>Asignar clientes sin vendedor</h2>
 
-  // 🚀 Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const storage = getStorage(app);
-  const db = getFirestore(app);
+  <!-- 🔍 Buscador -->
+  <div class="buscador">
+    <input type="text" id="buscador" placeholder="Buscar por nombre o solicitud">
+  </div>
 
-  // 🧠 Variables globales
-  let listaUsuarios = [];  // Lista de usuarios Firestore
-  let clientesSinVendedor = []; // Clientes filtrados
+  <!-- 📋 Tabla -->
+  <table class="tabla-clientes" id="tablaClientes">
+    <thead>
+      <tr>
+        <th>✔</th>
+        <th>Nombre</th>
+        <th>Grupo y orden</th>
+        <th>Solicitud</th>
+        <th>Asignar a</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-  // 🔁 Al cargar la página, inicia proceso
-  window.addEventListener("DOMContentLoaded", async () => {
-    await cargarUsuarios();
-    await leerUltimaCartera();
-  });
+  <!-- ✅ Botón -->
+  <button class="btn-actualizar" onclick="actualizarCartera()">Actualizar cartera</button>
 
-  // 📥 1. Obtener usuarios válidos desde Firestore
-  async function cargarUsuarios() {
-    const querySnapshot = await getDocs(collection(db, "usuarios"));
-    listaUsuarios = [];
+  <!-- ✅ Mensaje final -->
+  <div class="mensaje-final" id="mensajeFinal"></div>
 
-    querySnapshot.forEach((doc) => {
-      const user = doc.data();
-      if (["vendedor", "supervisor", "gerente"].includes(user.rol)) {
-        listaUsuarios.push({
-          email: user.email,
-          nombre: user.nombre,
-          rol: user.rol
-        });
-      }
+  <!-- 📦 Lógica -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+      authDomain: "clicon-oficial.firebaseapp.com",
+      projectId: "clicon-oficial",
+      storageBucket: "clicon-oficial.appspot.com",
+      messagingSenderId: "604078149403",
+      appId: "1:604078149403:web:5da069e8254c3695028dbe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const db = getFirestore(app);
+
+    let listaUsuarios = [];
+    let clientesOriginales = [];
+    let clientesSinVendedor = [];
+    let archivoOriginal;
+
+    // 🔁 Al cargar
+    window.addEventListener("DOMContentLoaded", async () => {
+      await cargarUsuarios();
+      await leerUltimaCartera();
     });
-  }
 
-  // 📦 2. Leer el archivo más reciente desde Storage
-  async function leerUltimaCartera() {
-    const carpetaRef = ref(storage, 'sanvicenteauto/historial_cartera');
-    const listado = await listAll(carpetaRef);
+    // 🔄 Cargar usuarios válidos
+    async function cargarUsuarios() {
+      const querySnapshot = await getDocs(collection(db, "usuarios"));
+      listaUsuarios = [];
 
-    if (listado.items.length === 0) {
-      alert("No se encontró ninguna cartera.");
-      return;
+      querySnapshot.forEach((doc) => {
+        const user = doc.data();
+        if (["vendedor", "supervisor", "gerente"].includes(user.rol)) {
+          listaUsuarios.push({
+            email: user.email,
+            nombre: user.nombre,
+            rol: user.rol
+          });
+        }
+      });
     }
 
-    // 📅 Buscar el archivo con nombre más reciente
-    const ultimoArchivo = listado.items.sort((a, b) => b.name.localeCompare(a.name))[0];
-    const url = await getDownloadURL(ultimoArchivo);
+    // 📥 Cargar última cartera
+    async function leerUltimaCartera() {
+      const carpetaRef = ref(storage, 'sanvicenteauto/historial_cartera');
+      const listado = await listAll(carpetaRef);
 
-    // 🧾 Leer y procesar el archivo Excel
-    const response = await fetch(url);
-    const data = await response.arrayBuffer();
-    const workbook = XLSX.read(data, { type: "array" });
-    const hoja = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(hoja);
+      if (listado.items.length === 0) {
+        alert("No se encontró ninguna cartera.");
+        return;
+      }
 
-    // 🎯 Filtrar clientes sin VENDEDOR
-    clientesSinVendedor = json.filter(c => !c.VENDEDOR || c.VENDEDOR.toString().trim() === "");
+      const ultimoArchivo = listado.items.sort((a, b) => b.name.localeCompare(a.name))[0];
+      archivoOriginal = ultimoArchivo;
+      const url = await getDownloadURL(ultimoArchivo);
 
-    // 🖥️ Mostrar en tabla
-    renderizarTabla(clientesSinVendedor);
-  }
+      const response = await fetch(url);
+      const data = await response.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const hoja = workbook.Sheets[workbook.SheetNames[0]];
+      clientesOriginales = XLSX.utils.sheet_to_json(hoja);
 
-  // 📊 3. Mostrar datos en HTML
-  function renderizarTabla(lista) {
-    const tabla = document.querySelector("#tablaClientes tbody");
-    tabla.innerHTML = "";
+      clientesSinVendedor = clientesOriginales.filter(c => !c.VENDEDOR || c.VENDEDOR.toString().trim() === "");
+      renderizarTabla(clientesSinVendedor);
+    }
 
-    lista.forEach((cliente, index) => {
-      const fila = document.createElement("tr");
+    // 🖥️ Mostrar clientes
+   function renderizarTabla(lista) {
+   const tabla = document.querySelector("#tablaClientes tbody");
+   tabla.innerHTML = "";
 
-      fila.innerHTML = `
-        <td><input type="checkbox" class="check-cliente" data-index="${index}"></td>
-        <td>${cliente.NOMBRE_SUSCRIPTOR || "-"}</td>
-        <td>${cliente.CONTRATO || "-"}</td>
-        <td>${cliente.SUSCRIPCION || "-"}</td>
-        <td>
-          <select class="selector-usuario" data-index="${index}">
-            <option value="">Seleccionar</option>
-            ${listaUsuarios.map(u => `<option value="${u.email}">${u.nombre} (${u.rol})</option>`).join("")}
-          </select>
-        </td>
-      `;
-      tabla.appendChild(fila);
+   lista.forEach((cliente, index) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td><input type="checkbox" class="check-cliente" data-index="${index}"></td>
+      <td>${cliente.NOMBRE_SUSCRIPTOR || "-"}</td>
+      <td>${cliente.CONTRATO || "-"}</td>
+      <td>${cliente.SUSCRIPCION || "-"}</td>
+      <td>
+        <select class="selector-usuario" data-index="${index}">
+          <option value="">Seleccionar</option>
+          ${listaUsuarios.map(u => `<option value="${u.email}">${u.nombre}</option>`).join("")}
+        </select>
+      </td>
+    `;
+    tabla.appendChild(fila);
+  });
+}
+
+    // 💾 Guardar cambios
+    async function actualizarCartera() {
+      let asignaciones = {};
+      let asignados = 0;
+      let nombreAsignado = "";
+
+      document.querySelectorAll(".check-cliente").forEach((checkbox) => {
+        const index = checkbox.dataset.index;
+        const selector = document.querySelector(`.selector-usuario[data-index="${index}"]`);
+        const email = selector.value;
+
+        if (checkbox.checked && email) {
+          const cliente = clientesSinVendedor[index];
+          cliente.VENDEDOR = email;
+          asignados++;
+
+          // guardar info para mensaje
+          if (!asignaciones[email]) asignaciones[email] = 0;
+          asignaciones[email]++;
+        }
+      });
+
+      // Reemplazar los datos en el original
+      clientesOriginales.forEach(cliente => {
+        const modificado = clientesSinVendedor.find(c => c.SUSCRIPCION === cliente.SUSCRIPCION);
+        if (modificado && modificado.VENDEDOR) {
+          cliente.VENDEDOR = modificado.VENDEDOR;
+        }
+      });
+
+      const nuevaHoja = XLSX.utils.json_to_sheet(clientesOriginales);
+      const nuevoLibro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(nuevoLibro, nuevaHoja, "Hoja1");
+      const excelBuffer = XLSX.write(nuevoLibro, { bookType: "xlsx", type: "array" });
+
+      await uploadBytes(archivoOriginal, new Blob([excelBuffer]));
+
+      // Mostrar mensaje final
+      const mensaje = Object.entries(asignaciones)
+        .map(([email, cantidad]) => `${cantidad} a ${email}`)
+        .join(", ");
+
+      document.getElementById("mensajeFinal").textContent = `Se asignaron ${asignados} clientes: ${mensaje}`;
+      document.getElementById("mensajeFinal").style.display = "block";
+
+      // Quitar los ya asignados
+      await leerUltimaCartera();
+    }
+
+    // 🔍 Buscador
+    document.getElementById('buscador').addEventListener('keyup', function () {
+      const valor = this.value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaClientes tbody tr");
+
+      filas.forEach(fila => {
+        const nombre = fila.children[1].textContent.toLowerCase();
+        const solicitud = fila.children[3].textContent.toLowerCase();
+        fila.style.display = (nombre.includes(valor) || solicitud.includes(valor)) ? '' : 'none';
+      });
     });
-  }
+  </script>
 
-</script>
+</body>
+</html>
+
