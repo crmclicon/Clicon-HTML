@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asignar Clientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F8FBFF;
+      padding: 20px;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .buscador {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+    }
+    .tabla-clientes {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+    }
+    .tabla-clientes th, .tabla-clientes td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
+      text-align: left;
+    }
+    .tabla-clientes th {
+      background-color: #f0f4f8;
+    }
+    .selector-usuario {
+      padding: 6px;
+      width: 100%;
+    }
+    .btn-actualizar {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #3399FF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .mensaje-final {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e7f5e6;
+      border-left: 4px solid #34a853;
+      color: #2b662e;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Asignar clientes sin vendedor</h2>
+
+  <!-- 🟦 Buscador -->
+  <div class="buscador">
+    <input type="text" id="buscador" placeholder="Buscar por nombre o solicitud">
+  </div>
+
+  <!-- 📋 Tabla de clientes -->
+  <table class="tabla-clientes" id="tablaClientes">
+    <thead>
+      <tr>
+        <th>✔</th>
+        <th>Nombre</th>
+        <th>Grupo y orden</th>
+        <th>Solicitud</th>
+        <th>Asignar a</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 🔁 Filas de prueba -->
+      <tr>
+        <td><input type="checkbox" class="check-cliente"></td>
+        <td>Juan López</td>
+        <td>123456</td>
+        <td>ABC123</td>
+        <td>
+          <select class="selector-usuario">
+            <option value="">Seleccionar</option>
+            <option value="ayelen@clicon.com.ar">Ayelén (Vendedor)</option>
+            <option value="martin@clicon.com.ar">Martín (Supervisor)</option>
+            <option value="marcos@clicon.com.ar">Marcos (Gerente)</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" class="check-cliente"></td>
+        <td>Laura Pérez</td>
+        <td>654321</td>
+        <td>XYZ456</td>
+        <td>
+          <select class="selector-usuario">
+            <option value="">Seleccionar</option>
+            <option value="ayelen@clicon.com.ar">Ayelén (Vendedor)</option>
+            <option value="martin@clicon.com.ar">Martín (Supervisor)</option>
+            <option value="marcos@clicon.com.ar">Marcos (Gerente)</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ✅ Botón -->
+  <button class="btn-actualizar" onclick="mostrarMensaje()">Actualizar cartera</button>
+
+  <!-- ✅ Mensaje final -->
+  <div class="mensaje-final" id="mensajeFinal">
+    Se asignaron 2 clientes a Ayelén (ayelen@clicon.com.ar)
+  </div>
+
+  <script>
+    // Simulación del mensaje de confirmación
+    function mostrarMensaje() {
+      document.getElementById('mensajeFinal').style.display = 'block';
+    }
+
+    // 🔍 Filtro básico por nombre o solicitud
+    document.getElementById('buscador').addEventListener('keyup', function () {
+      const valor = this.value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaClientes tbody tr");
+
+      filas.forEach(fila => {
+        const nombre = fila.children[1].textContent.toLowerCase();
+        const solicitud = fila.children[3].textContent.toLowerCase();
+        fila.style.display = (nombre.includes(valor) || solicitud.includes(valor)) ? '' : 'none';
+      });
+    });
+  </script>
+
+</body>
+</html>
