@@ -1,141 +1,102 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Asignar Clientes</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #F8FBFF;
-      padding: 20px;
-    }
-    h2 {
-      margin-bottom: 20px;
-    }
-    .buscador {
-      margin-bottom: 20px;
-    }
-    input[type="text"] {
-      padding: 8px;
-      width: 300px;
-    }
-    .tabla-clientes {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #fff;
-    }
-    .tabla-clientes th, .tabla-clientes td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      font-size: 14px;
-      text-align: left;
-    }
-    .tabla-clientes th {
-      background-color: #f0f4f8;
-    }
-    .selector-usuario {
-      padding: 6px;
-      width: 100%;
-    }
-    .btn-actualizar {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #3399FF;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .mensaje-final {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #e7f5e6;
-      border-left: 4px solid #34a853;
-      color: #2b662e;
-      display: none;
-    }
-  </style>
-</head>
-<body>
+<script type="module">
+  // 🔌 Importar módulos necesarios de Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getStorage, listAll, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
 
-  <h2>Asignar clientes sin vendedor</h2>
+  // 🔐 Configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDw4amrnoIcj1nvBeOlchzv5kBaD_sVSoE",
+    authDomain: "clicon-oficial.firebaseapp.com",
+    projectId: "clicon-oficial",
+    storageBucket: "clicon-oficial.appspot.com",
+    messagingSenderId: "604078149403",
+    appId: "1:604078149403:web:5da069e8254c3695028dbe"
+  };
 
-  <!-- 🟦 Buscador -->
-  <div class="buscador">
-    <input type="text" id="buscador" placeholder="Buscar por nombre o solicitud">
-  </div>
+  // 🚀 Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+  const db = getFirestore(app);
 
-  <!-- 📋 Tabla de clientes -->
-  <table class="tabla-clientes" id="tablaClientes">
-    <thead>
-      <tr>
-        <th>✔</th>
-        <th>Nombre</th>
-        <th>Grupo y orden</th>
-        <th>Solicitud</th>
-        <th>Asignar a</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- 🔁 Filas de prueba -->
-      <tr>
-        <td><input type="checkbox" class="check-cliente"></td>
-        <td>Juan López</td>
-        <td>123456</td>
-        <td>ABC123</td>
-        <td>
-          <select class="selector-usuario">
-            <option value="">Seleccionar</option>
-            <option value="ayelen@clicon.com.ar">Ayelén (Vendedor)</option>
-            <option value="martin@clicon.com.ar">Martín (Supervisor)</option>
-            <option value="marcos@clicon.com.ar">Marcos (Gerente)</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" class="check-cliente"></td>
-        <td>Laura Pérez</td>
-        <td>654321</td>
-        <td>XYZ456</td>
-        <td>
-          <select class="selector-usuario">
-            <option value="">Seleccionar</option>
-            <option value="ayelen@clicon.com.ar">Ayelén (Vendedor)</option>
-            <option value="martin@clicon.com.ar">Martín (Supervisor)</option>
-            <option value="marcos@clicon.com.ar">Marcos (Gerente)</option>
-          </select>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  // 🧠 Variables globales
+  let listaUsuarios = [];  // Lista de usuarios Firestore
+  let clientesSinVendedor = []; // Clientes filtrados
 
-  <!-- ✅ Botón -->
-  <button class="btn-actualizar" onclick="mostrarMensaje()">Actualizar cartera</button>
+  // 🔁 Al cargar la página, inicia proceso
+  window.addEventListener("DOMContentLoaded", async () => {
+    await cargarUsuarios();
+    await leerUltimaCartera();
+  });
 
-  <!-- ✅ Mensaje final -->
-  <div class="mensaje-final" id="mensajeFinal">
-    Se asignaron 2 clientes a Ayelén (ayelen@clicon.com.ar)
-  </div>
+  // 📥 1. Obtener usuarios válidos desde Firestore
+  async function cargarUsuarios() {
+    const querySnapshot = await getDocs(collection(db, "usuarios"));
+    listaUsuarios = [];
 
-  <script>
-    // Simulación del mensaje de confirmación
-    function mostrarMensaje() {
-      document.getElementById('mensajeFinal').style.display = 'block';
-    }
-
-    // 🔍 Filtro básico por nombre o solicitud
-    document.getElementById('buscador').addEventListener('keyup', function () {
-      const valor = this.value.toLowerCase();
-      const filas = document.querySelectorAll("#tablaClientes tbody tr");
-
-      filas.forEach(fila => {
-        const nombre = fila.children[1].textContent.toLowerCase();
-        const solicitud = fila.children[3].textContent.toLowerCase();
-        fila.style.display = (nombre.includes(valor) || solicitud.includes(valor)) ? '' : 'none';
-      });
+    querySnapshot.forEach((doc) => {
+      const user = doc.data();
+      if (["vendedor", "supervisor", "gerente"].includes(user.rol)) {
+        listaUsuarios.push({
+          email: user.email,
+          nombre: user.nombre,
+          rol: user.rol
+        });
+      }
     });
-  </script>
+  }
 
-</body>
-</html>
+  // 📦 2. Leer el archivo más reciente desde Storage
+  async function leerUltimaCartera() {
+    const carpetaRef = ref(storage, 'sanvicenteauto/historial_cartera');
+    const listado = await listAll(carpetaRef);
+
+    if (listado.items.length === 0) {
+      alert("No se encontró ninguna cartera.");
+      return;
+    }
+
+    // 📅 Buscar el archivo con nombre más reciente
+    const ultimoArchivo = listado.items.sort((a, b) => b.name.localeCompare(a.name))[0];
+    const url = await getDownloadURL(ultimoArchivo);
+
+    // 🧾 Leer y procesar el archivo Excel
+    const response = await fetch(url);
+    const data = await response.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array" });
+    const hoja = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(hoja);
+
+    // 🎯 Filtrar clientes sin VENDEDOR
+    clientesSinVendedor = json.filter(c => !c.VENDEDOR || c.VENDEDOR.toString().trim() === "");
+
+    // 🖥️ Mostrar en tabla
+    renderizarTabla(clientesSinVendedor);
+  }
+
+  // 📊 3. Mostrar datos en HTML
+  function renderizarTabla(lista) {
+    const tabla = document.querySelector("#tablaClientes tbody");
+    tabla.innerHTML = "";
+
+    lista.forEach((cliente, index) => {
+      const fila = document.createElement("tr");
+
+      fila.innerHTML = `
+        <td><input type="checkbox" class="check-cliente" data-index="${index}"></td>
+        <td>${cliente.NOMBRE_SUSCRIPTOR || "-"}</td>
+        <td>${cliente.CONTRATO || "-"}</td>
+        <td>${cliente.SUSCRIPCION || "-"}</td>
+        <td>
+          <select class="selector-usuario" data-index="${index}">
+            <option value="">Seleccionar</option>
+            ${listaUsuarios.map(u => `<option value="${u.email}">${u.nombre} (${u.rol})</option>`).join("")}
+          </select>
+        </td>
+      `;
+      tabla.appendChild(fila);
+    });
+  }
+
+</script>
